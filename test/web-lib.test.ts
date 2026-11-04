@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  formatPrice, formatChange, formatVolume, timeAgo, selectRows, movers, categories, categoryLabel, freshnessState, itemHash, findByHash, toggleWatch, displayPrice, chartUnit, compareRows, compareLabel, toDivineSeries, leagueChartModel, nearestValue, iconUrl,
+  formatPrice, formatChange, formatVolume, timeAgo, selectRows, movers, categories, categoryLabel, freshnessState, itemHash, findByHash, toggleWatch, displayPrice, chartUnit, compareRows, compareLabel, toDivineSeries, leagueChartModel, nearestValue, iconUrl, itemIcon, DIVINATION_CARD_ICON,
   defaultLeague, chartModel, niceTicks, newestUpdate,
 } from "../web/lib.js";
 
@@ -190,4 +190,10 @@ test("poe.ninja generated icons map to GGG's CDN", () => {
   assert.equal(iconUrl(u), "https://web.poecdn.com/image/Art/2DItems/Currency/Scarabs/GreaterScarabUnique.png?scale=1");
   assert.equal(iconUrl("https://example.com/x.png"), "https://example.com/x.png");
   assert.equal(iconUrl(null), null);
+});
+
+test("every divination card uses the generic card icon", () => {
+  assert.equal(itemIcon({ category: "DivinationCard", icon_url: "https://poe.ninja/gen/image/abc/x.png" }), DIVINATION_CARD_ICON);
+  assert.equal(itemIcon({ category: "DivinationCard", icon_url: null }), DIVINATION_CARD_ICON);
+  assert.equal(itemIcon({ category: "Currency", icon_url: null }), null);
 });
