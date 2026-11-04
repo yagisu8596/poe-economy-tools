@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  formatPrice, formatChange, formatVolume, timeAgo, selectRows, movers, categories, categoryLabel, freshnessState, itemHash, findByHash, toggleWatch, displayPrice, chartUnit, compareRows, compareLabel, toDivineSeries, leagueChartModel, nearestValue,
+  formatPrice, formatChange, formatVolume, timeAgo, selectRows, movers, categories, categoryLabel, freshnessState, itemHash, findByHash, toggleWatch, displayPrice, chartUnit, compareRows, compareLabel, toDivineSeries, leagueChartModel, nearestValue, iconUrl,
   defaultLeague, chartModel, niceTicks, newestUpdate,
 } from "../web/lib.js";
 
@@ -183,4 +183,11 @@ test("nearest reliable day within ±3", () => {
   assert.deepEqual(nearestValue(p, 5), { value: 6, day: 6 });
   assert.equal(nearestValue([null, null, null, null, null, null, null, 8], 2), null, "too far");
   assert.equal(nearestValue(null, 3), null);
+});
+
+test("poe.ninja generated icons map to GGG's CDN", () => {
+  const u = "https://poe.ninja/gen/image/WzI1LDE0LHsiZiI6IjJESXRlbXMvQ3VycmVuY3kvU2NhcmFicy9HcmVhdGVyU2NhcmFiVW5pcXVlIiwic2NhbGUiOjF9XQ/0194f878a0/GreaterScarabUnique.png";
+  assert.equal(iconUrl(u), "https://web.poecdn.com/image/Art/2DItems/Currency/Scarabs/GreaterScarabUnique.png?scale=1");
+  assert.equal(iconUrl("https://example.com/x.png"), "https://example.com/x.png");
+  assert.equal(iconUrl(null), null);
 });

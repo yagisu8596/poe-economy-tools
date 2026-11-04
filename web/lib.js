@@ -288,3 +288,19 @@ export function nearestValue(prices, day, maxGap = 3) {
   }
   return null;
 }
+
+/**
+ * poe.ninja's generated image URLs (/gen/image/<base64 JSON>/…) do not load on other sites.
+ * They wrap GGG's CDN path ({"f":"2DItems/…"}), so point straight at web.poecdn.com.
+ */
+export function iconUrl(url) {
+  const m = /\/gen\/image\/([A-Za-z0-9_-]+)\//.exec(String(url || ""));
+  if (!m) return url || null;
+  try {
+    const b64 = m[1].replace(/-/g, "+").replace(/_/g, "/");
+    const json = JSON.parse(typeof atob === "function" ? atob(b64 + "===".slice((b64.length + 3) % 4)) : Buffer.from(b64, "base64").toString("utf8"));
+    const f = json.find?.((x) => x && typeof x === "object" && typeof x.f === "string")?.f;
+    if (f && /^[\w/.-]+$/.test(f)) return `https://web.poecdn.com/image/Art/${f}.png?scale=1`;
+  } catch { /* keep the original */ }
+  return url;
+}
