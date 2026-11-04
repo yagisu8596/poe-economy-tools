@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PoE Economy Tools</title>
+<meta name="description" content="Intraday price moves for Path of Exile currency, scarabs and more, from poe.ninja exchange data.">
+<meta name="theme-color" content="#12110f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f2f1ed" media="(prefers-color-scheme: light)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!--APP-BODY-START-->
+<div class="shell">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 28 9v14L16 30 4 23V9z" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".55"/><path d="M16 8 22 11.5v9L16 24l-6-3.5v-9z" fill="#c9a24e"/><path d="M16 8v16" stroke="#7a5a18" stroke-width="1.2"/></svg>
+      <div><h1>PoE Economy Tools</h1><small>Path of Exile market radar</small></div>
+    </div>
+    <label class="label-sm" for="league">League</label>
+    <select id="league" aria-label="League"></select>
+    <span class="fresh" id="freshness"><span>Loading prices…</span></span>
+  </header>
+
+  <section class="controls" aria-label="Filters">
+    <div class="seg" role="group" aria-label="Change window">
+      <button type="button" data-window="1h" aria-pressed="true">1h</button>
+      <button type="button" data-window="6h" aria-pressed="false">6h</button>
+      <button type="button" data-window="24h" aria-pressed="false">24h</button>
+      <button type="button" data-window="7d" aria-pressed="false">7d</button>
+    </div>
+    <select id="category" aria-label="Category"></select>
+    <input id="search" type="search" placeholder="Search items" aria-label="Search items" autocomplete="off">
+    <label class="toggle"><input type="checkbox" id="hide-thin" checked> Hide thin markets</label>
+  </section>
+  <div class="error" id="error" role="alert" hidden></div>
+
+  <section class="movers" aria-labelledby="movers-title">
+    <div class="movers-head"><h2 id="movers-title">Biggest moves</h2><p class="movers-note" id="movers-note" hidden></p></div>
+    <div class="movers-cols">
+      <div class="movers-col up"><h3>Rising</h3><ul id="risers"></ul></div>
+      <div class="movers-col down"><h3>Falling</h3><ul id="fallers"></ul></div>
+    </div>
+  </section>
+
+  <div class="main">
+    <section class="table-wrap" aria-label="Prices">
+      <div class="table-meta"><span id="count"></span><span>Click an item for its price chart</span></div>
+      <table>
+        <thead><tr>
+          <th data-sort="name" tabindex="0" aria-sort="none">Item</th>
+          <th data-sort="price" tabindex="0" class="c-num" aria-sort="none">Price</th>
+          <th data-sort="change" tabindex="0" class="c-num" id="col-change" aria-sort="none">Change 1h</th>
+          <th data-sort="volume" tabindex="0" class="c-num c-vol" aria-sort="descending">Traded</th>
+          <th>Confidence</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </section>
+
+    <aside id="detail" aria-label="Item details" hidden>
+      <div class="d-head">
+        <span id="d-icon"></span>
+        <div><h2 id="d-name"></h2><p id="d-cat"></p></div>
+        <button type="button" class="d-close" id="d-close" aria-label="Close details">×</button>
+      </div>
+      <div class="d-price"><strong id="d-price"></strong><span id="d-alt"></span></div>
+      <p class="d-updated" id="d-updated"></p>
+      <div class="d-actions">
+        <button type="button" class="btn" id="d-watch" aria-pressed="false">☆ Watch</button>
+        <button type="button" class="btn" id="d-copy" title="Copy the item name to paste into the in-game search">Copy name</button>
+        <button type="button" class="btn" id="d-link">Copy link</button>
+      </div>
+      <dl class="d-windows" id="d-windows"></dl>
+      <div class="seg" role="group" aria-label="Chart range">
+        <button type="button" data-range="24h" aria-pressed="true">24h</button>
+        <button type="button" data-range="7d" aria-pressed="false">7d</button>
+        <button type="button" data-range="30d" aria-pressed="false">30d</button>
+      </div>
+      <div id="chart"></div>
+      <p class="chart-note" id="chart-note"></p>
+      <section class="cmp" aria-labelledby="cmp-title">
+        <div class="cmp-head">
+          <h3 id="cmp-title">Same day in past leagues</h3>
+          <div class="cmp-day">
+            <button type="button" class="btn btn-sq" id="cmp-prev" aria-label="Previous league day">−</button>
+            <label for="cmp-day">Day</label>
+            <input id="cmp-day" type="number" min="1" max="400" step="1" inputmode="numeric">
+            <button type="button" class="btn btn-sq" id="cmp-next" aria-label="Next league day">+</button>
+            <button type="button" class="btn" id="cmp-today">Today</button>
+          </div>
+        </div>
+        <div class="seg" role="group" aria-label="Compare in">
+          <button type="button" data-cmp-unit="chaos" aria-pressed="true">Chaos</button>
+          <button type="button" data-cmp-unit="divine" aria-pressed="false">Divine</button>
+        </div>
+        <table class="cmp-table">
+          <thead><tr><th>League</th><th class="c-num">Price</th><th class="c-num" title="How this league's price compares with that league on the same day">Now vs</th></tr></thead>
+          <tbody id="cmp-body"></tbody>
+        </table>
+        <div id="cmp-chart"></div>
+        <p class="chart-note" id="cmp-note"></p>
+      </section>
+      <p class="d-hint">poe.ninja publishes new exchange prices about once an hour. Check the live rate in game before you trade.</p>
+    </aside>
+  </div>
+
+  <footer>
+    <p>Prices from <a href="https://poe.ninja" target="_blank" rel="noopener">poe.ninja</a>, checked every 15 minutes (poe.ninja publishes new exchange prices about once an hour); changes are calculated from our own snapshots and stay empty until enough history exists. “Traded” is the value that changed hands in chaos. Past-league prices: daily values from <a href="https://poe.ninja/poe1/data" target="_blank" rel="noopener">poe.ninja data dumps</a> (CC BY-SA); day 1 is each league's launch day. Thin markets (very few trades) can show misleading spikes.</p>
+    <p>Not financial advice. This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</p>
+  </footer>
+</div>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<!--APP-BODY-END-->
+<script type="module">
+  import { startApp } from "./app.js";
+  import { supabaseSource } from "./api.js";
+  import { SUPABASE } from "./config.js";
+  startApp(supabaseSource(SUPABASE));
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
