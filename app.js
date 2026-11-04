@@ -3,7 +3,7 @@ import {
   WINDOWS, RANGES, CONFIDENCE, formatPrice, formatChange, formatVolume, timeAgo, newestUpdate,
   selectRows, movers, categories, categoryLabel, defaultLeague, leagueLabel, chartModel, formatTick,
   freshnessState, itemHash, findByHash, toggleWatch, displayPrice, chartUnit,
-  compareRows, toDivineSeries, leagueChartModel, nearestValue, iconUrl,
+  compareRows, toDivineSeries, leagueChartModel, nearestValue, itemIcon,
 } from "./lib.js";
 
 const REFRESH_MS = 5 * 60 * 1000;
@@ -174,8 +174,9 @@ export function startApp(source) {
   }
 
   function icon(r, eager = false) {
-    return r.icon_url
-      ? `<img class="ico" src="${esc(iconUrl(r.icon_url))}" alt="" width="28" height="28" loading="${eager ? "eager" : "lazy"}" referrerpolicy="no-referrer">`
+    const src = itemIcon(r);
+    return src
+      ? `<img class="ico" src="${esc(src)}" alt="" width="28" height="28" loading="${eager ? "eager" : "lazy"}" referrerpolicy="no-referrer">`
       : `<span class="ico ico-blank" aria-hidden="true"></span>`;
   }
 

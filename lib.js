@@ -304,3 +304,12 @@ export function iconUrl(url) {
   } catch { /* keep the original */ }
   return url;
 }
+
+/** The generic divination card icon from GGG's CDN, used for every card. */
+export const DIVINATION_CARD_ICON = "https://web.poecdn.com/image/Art/2DItems/Divination/InventoryIcon.png?scale=1";
+
+/** Icon to show for a row: the generic card icon for divination cards, else the item's own icon. */
+export function itemIcon(row) {
+  if (row?.category === "DivinationCard") return DIVINATION_CARD_ICON;
+  return iconUrl(row?.icon_url);
+}
