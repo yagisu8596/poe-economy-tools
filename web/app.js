@@ -136,7 +136,7 @@ export function startApp(source) {
   function moverItem(r, field) {
     const p = displayPrice(r), c = formatChange(r[field]);
     return `<li><button type="button" class="mover" data-item="${r.item_id}">
-      ${icon(r)}<span class="mover-name">${esc(r.name)}</span>
+      ${icon(r, true)}<span class="mover-name">${esc(r.name)}</span>
       <span class="mover-price">${esc(p.main)}</span>
       <span class="chg" data-dir="${c.dir}">${esc(c.text)}</span></button></li>`;
   }
@@ -173,9 +173,9 @@ export function startApp(source) {
       aria-label="${on ? "Remove" : "Add"} ${esc(r.name)} ${on ? "from" : "to"} watchlist" title="${on ? "Remove from" : "Add to"} watchlist">${on ? "★" : "☆"}</button>`;
   }
 
-  function icon(r) {
+  function icon(r, eager = false) {
     return r.icon_url
-      ? `<img class="ico" src="${esc(iconUrl(r.icon_url))}" alt="" width="28" height="28" loading="lazy" referrerpolicy="no-referrer">`
+      ? `<img class="ico" src="${esc(iconUrl(r.icon_url))}" alt="" width="28" height="28" loading="${eager ? "eager" : "lazy"}" referrerpolicy="no-referrer">`
       : `<span class="ico ico-blank" aria-hidden="true"></span>`;
   }
 
@@ -212,7 +212,7 @@ export function startApp(source) {
     document.body.classList.toggle("detail-open", !!r);
     if (!r) return;
     const p = displayPrice(r);
-    $("#d-icon").innerHTML = icon(r);
+    $("#d-icon").innerHTML = icon(r, true);
     $("#d-name").textContent = r.name;
     $("#d-cat").textContent = `${categoryLabel(r.category)} · ${CONFIDENCE[r.confidence ?? 0]} confidence · traded ${formatVolume(r.volume_chaos)}`;
     $("#d-price").textContent = p.main;
