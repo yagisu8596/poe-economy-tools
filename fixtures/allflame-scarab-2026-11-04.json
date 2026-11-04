@@ -1,0 +1,14 @@
+{
+  "_note": "Trimmed real response from GET https://poe.ninja/poe1/api/economy/exchange/current/overview?league=Allflame&type=Scarab, captured 2026-11-04 ~03:10 TRT (first 3 of 115 lines). No divine/chaos lines exist in non-Currency categories.",
+  "core": { "rates": { "divine": 0.002353 }, "primary": "chaos", "secondary": "divine" },
+  "lines": [
+    { "id": "abyss-scarab-of-descending", "primaryValue": 1.47, "volumePrimaryValue": 111.8, "maxVolumeCurrency": "chaos", "maxVolumeRate": 0.6796, "sparkline": { "totalChange": -42.01, "data": [-38.25, -36.28, -53.00, -33.98, -44.13, -39.33, -42.01] } },
+    { "id": "abyss-scarab-of-the-consort", "primaryValue": 10.15, "volumePrimaryValue": 203.0, "maxVolumeCurrency": "chaos", "maxVolumeRate": 0.09852, "sparkline": { "totalChange": -45.97, "data": [-43.28, -49.46, -55.52, -55.97, -44.88, -45.60, -45.97] } },
+    { "id": "ambush-scarab", "primaryValue": 2.93, "volumePrimaryValue": 1084, "maxVolumeCurrency": "chaos", "maxVolumeRate": 0.3418, "sparkline": { "totalChange": -33.64, "data": [-19.91, -23.44, -29.88, -27.39, -44.62, -34.53, -33.64] } }
+  ],
+  "items": [
+    { "id": "abyss-scarab-of-descending", "name": "Abyss Scarab of Descending", "image": "/gen/image/abyss-descending.png", "category": "Scarab" },
+    { "id": "abyss-scarab-of-the-consort", "name": "Abyss Scarab of the Consort", "image": "/gen/image/abyss-consort.png", "category": "Scarab" },
+    { "id": "ambush-scarab", "name": "Ambush Scarab", "image": "/gen/image/ambush.png", "category": "Scarab" }
+  ]
+}

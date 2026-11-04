@@ -1,0 +1,626 @@
+<title>Supabase Kurulumu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@600;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one narrow column of numbered setup steps; each step is a stone slab with its own copy-ready code. */
+:root {
+  --bg: #f1f2ef;          /* cool limestone */
+  --panel: #fbfbf9;
+  --ink: #1c1e1a;
+  --muted: #5b5f57;
+  --rule: #d5d7d0;
+  --gold: #8a6418;        /* divine-orb gold, darkened for contrast on light */
+  --gold-soft: #f1e6cc;
+  --code-bg: #e8eae4;
+  --ok: #2f6b3a;
+  --warn: #9a4b12;
+  --font-display: "Cormorant SC", "Trajan Pro", Georgia, serif;
+  --font-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131412; --panel: #1b1c19; --ink: #e6e4dd; --muted: #a3a49b; --rule: #33352f;
+    --gold: #d8b25c; --gold-soft: #2c2616; --code-bg: #10110f; --ok: #7fbf87; --warn: #e39a5e;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131412; --panel: #1b1c19; --ink: #e6e4dd; --muted: #a3a49b; --rule: #33352f;
+  --gold: #d8b25c; --gold-soft: #2c2616; --code-bg: #10110f; --ok: #7fbf87; --warn: #e39a5e;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font: 16px/1.55 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+.wrap { max-width: 760px; margin: 0 auto; display: grid; gap: 20px; }
+header { display: grid; gap: 6px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); }
+.eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+h1 { font-family: var(--font-display); font-size: clamp(30px, 6vw, 42px); line-height: 1.05; margin: 0; text-wrap: balance; letter-spacing: .02em; }
+.lead { color: var(--muted); margin: 0; max-width: 62ch; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.fact { font-size: 13px; padding: 3px 10px; border: 1px solid var(--rule); border-radius: 999px; color: var(--muted); background: var(--panel); }
+.fact b { color: var(--ink); font-weight: 600; }
+
+.step { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 18px 18px 20px; display: grid; gap: 12px; min-width: 0; }
+.step.done { border-color: color-mix(in srgb, var(--ok) 45%, var(--rule)); }
+.step-head { display: flex; align-items: center; gap: 12px; }
+.num { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--gold); border: 1.5px solid var(--gold); background: var(--gold-soft); }
+.step.done .num { color: var(--ok); border-color: var(--ok); background: transparent; }
+h2 { margin: 0; font-size: 19px; line-height: 1.25; flex: 1; text-wrap: balance; }
+.donebox { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); cursor: pointer; user-select: none; white-space: nowrap; }
+.donebox input { accent-color: var(--ok); width: 16px; height: 16px; }
+ol, ul { margin: 0; padding-left: 22px; display: grid; gap: 6px; max-width: 66ch; }
+p { margin: 0; max-width: 66ch; }
+kbd, .ui { font-family: var(--font-body); font-weight: 600; font-size: .92em; padding: 1px 6px; border-radius: 4px; background: var(--code-bg); border: 1px solid var(--rule); white-space: nowrap; }
+code.inline { font-family: var(--font-mono); font-size: .88em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+.note { font-size: 14.5px; color: var(--muted); border-left: 3px solid var(--rule); padding-left: 12px; }
+.note.warn { border-left-color: var(--warn); color: var(--ink); }
+.note.warn strong { color: var(--warn); }
+
+.code { border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; min-width: 0; }
+.code-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px 8px 14px; background: var(--code-bg); border-bottom: 1px solid var(--rule); flex-wrap: wrap; }
+.code-name { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+pre { margin: 0; padding: 12px 14px; max-height: 260px; overflow: auto; background: var(--code-bg); font: 12.5px/1.5 var(--font-mono); color: var(--ink); white-space: pre; tab-size: 2; }
+pre.short { max-height: none; }
+button.copy { font: 600 14px var(--font-body); padding: 7px 14px; border-radius: 6px; border: 1.5px solid var(--gold); background: var(--gold); color: var(--panel); cursor: pointer; min-width: 104px; }
+button.copy:hover { filter: brightness(1.08); }
+button.copy:disabled { background: transparent; color: var(--muted); border-color: var(--rule); cursor: not-allowed; filter: none; }
+button.copy.copied { background: var(--ok); border-color: var(--ok); }
+button:focus-visible, input:focus-visible, label:focus-within { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.fields { display: grid; gap: 14px; }
+.field { display: grid; gap: 4px; }
+.field label { font-weight: 600; font-size: 14.5px; }
+.field input { font: 15px var(--font-mono); padding: 9px 11px; border-radius: 6px; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); width: 100%; min-width: 0; }
+.field .hint { font-size: 13px; color: var(--muted); }
+.field .status { font-size: 13px; font-weight: 600; }
+.field label.check { display: flex; gap: 8px; align-items: flex-start; font-weight: 400; cursor: pointer; }
+.field label.check input { width: 18px; height: 18px; flex: none; margin: 2px 0 0; accent-color: var(--accent, currentColor); }
+.status.good { color: var(--ok); } .status.bad { color: var(--warn); }
+.updates-head { margin-top: 24px; }
+h3 { margin: 6px 0 0; font-size: 15.5px; color: var(--gold); letter-spacing: .02em; }
+select { font: 15px var(--font-body); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); width: 100%; min-width: 0; }
+.alarm-form { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.h1-small { font-size: clamp(24px, 5vw, 32px); }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 14px; }
+@media (max-width: 480px) { .step-head { flex-wrap: wrap; } .donebox { margin-left: 46px; } }
+@media (prefers-reduced-motion: no-preference) { button.copy { transition: background .15s, border-color .15s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">PoE Economy Tools · v0.2.0</span>
+    <h1>Supabase Kurulumu</h1>
+    <p class="lead">Fiyat toplayıcıyı kendi Supabase hesabına beş adımda kur. Her adımda sadece bir şey kopyalayıp yapıştıracaksın; şifre ya da gizli anahtar kimseyle paylaşılmıyor, bana da gönderme.</p>
+    <div class="facts">
+      <span class="fact">Süre <b>~15 dk</b></span>
+      <span class="fact">Maliyet <b>Ücretsiz plan</b></span>
+      <span class="fact">Hedef <b>3.30 başlamadan, 13 Kasım</b></span>
+    </div>
+  </header>
+
+  <!-- 1 -->
+  <section class="step" data-step="1">
+    <div class="step-head"><span class="num">1</span><h2>Projeyi oluştur</h2>
+      <label class="donebox"><input type="checkbox" id="done-1"> Tamam</label></div>
+    <ol>
+      <li><a href="https://supabase.com/dashboard" target="_blank" rel="noopener">supabase.com/dashboard</a> adresine kendi hesabınla gir.</li>
+      <li><span class="ui">New project</span> düğmesine bas.</li>
+      <li>Project name: <code class="inline">poe-economy-tools</code></li>
+      <li>Database password: <span class="ui">Generate a password</span> ile oluştur ve bir şifre yöneticisine ya da güvenli bir yere kaydet.</li>
+      <li>Region: <b>East US (North Virginia)</b>. Plan: <b>Free</b>. Bölge sonradan değiştirilemez; listede adı biraz farklı görünürse <code class="inline">us-east-1</code> olanı seç.</li>
+      <li><span class="ui">Create new project</span> düğmesine bas ve 1–2 dakika hazırlanmasını bekle.</li>
+    </ol>
+    <p class="note warn"><strong>Veritabanı şifresini kimseyle paylaşma</strong>, bana da gönderme. Kurulumda ona ihtiyacım yok.</p>
+  </section>
+
+  <!-- 2 -->
+  <section class="step" data-step="2">
+    <div class="step-head"><span class="num">2</span><h2>Veritabanını kur</h2>
+      <label class="donebox"><input type="checkbox" id="done-2"> Tamam</label></div>
+    <ol>
+      <li>Soldaki menüden <span class="ui">SQL Editor</span>'ı aç, sonra <span class="ui">New query</span>.</li>
+      <li>Aşağıdaki kodu kopyala, editöre yapıştır ve sağ alttaki <span class="ui">Run</span>'a bas.</li>
+      <li>Altta <b>Success. No rows returned</b> görmelisin. Uyarı penceresi çıkarsa onayla; kod yalnızca yeni tablolar oluşturur.</li>
+    </ol>
+    <div class="code">
+      <div class="code-bar"><span class="code-name" id="mig-name">01 · veritabanı.sql</span><button class="copy" type="button" data-copy="sql-migration" id="copy-migration">Kopyala</button></div>
+      <pre id="sql-migration-view"></pre>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="step" data-step="3">
+    <div class="step-head"><span class="num">3</span><h2>Toplayıcıyı yükle</h2>
+      <label class="donebox"><input type="checkbox" id="done-3"> Tamam</label></div>
+    <ol>
+      <li>Soldaki menüden <span class="ui">Edge Functions</span>'ı aç.</li>
+      <li><span class="ui">Deploy a new function</span> → <span class="ui">Via Editor</span>'ı seç.</li>
+      <li>Fonksiyon adını tam olarak <code class="inline">collect</code> yap.</li>
+      <li>Editördeki örnek kodun tamamını sil, aşağıdaki kodu yapıştır.</li>
+      <li><span class="ui">Deploy function</span>'a bas ve başarı mesajını bekle (10–30 saniye).</li>
+      <li>Fonksiyonun ayar sayfasında <b>Verify JWT</b> (ya da <b>Enforce JWT verification</b>) seçeneği varsa <b>kapat</b> ve kaydet. Toplayıcı kendi gizli anahtarıyla korunuyor.</li>
+    </ol>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">02 · collect.ts</span><button class="copy" type="button" data-copy="ts-function" id="copy-function">Kopyala</button></div>
+      <pre id="ts-function-view"></pre>
+    </div>
+    <p class="note">Editör altını kırmızıyla çizdiği birkaç tip uyarısı gösterebilir; dağıtımı engellemezler.</p>
+  </section>
+
+  <!-- 4 -->
+  <section class="step" data-step="4">
+    <div class="step-head"><span class="num">4</span><h2>Zamanlayıcıyı kur</h2>
+      <label class="donebox"><input type="checkbox" id="done-4"> Tamam</label></div>
+    <p>İki bilgiyi gir; kod kendiliğinden doldurulur.</p>
+    <div class="fields">
+      <div class="field">
+        <label for="project-url">Project URL</label>
+        <input id="project-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://abcdefghijklmnop.supabase.co">
+        <span class="hint">Proje sayfasının üstündeki <span class="ui">Connect</span> düğmesinde ya da <span class="ui">Project Settings → Data API</span> sayfasında yazar. Herkese açık bir adres, gizli değil.</span>
+        <span class="status" id="url-status" aria-live="polite"></span>
+      </div>
+      <div class="field">
+        <label for="contact">poe.ninja için iletişim adresi</label>
+        <input id="contact" type="text" autocomplete="off" spellcheck="false" placeholder="ornek@eposta.com">
+        <span class="hint">poe.ninja'ya giden isteklerde görünür, sitede görünmez. Boş bırakırsan sonra eklenebilir.</span>
+      </div>
+    </div>
+    <ol>
+      <li><span class="ui">SQL Editor</span> → <span class="ui">New query</span>, kodu yapıştır, <span class="ui">Run</span>.</li>
+      <li>Altta kırmızı bir hata olmadan küçük bir sonuç tablosu görmelisin.</li>
+    </ol>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">03 · zamanlayıcı.sql</span><button class="copy" type="button" data-copy="sql-schedule" id="copy-schedule" disabled>Kopyala</button></div>
+      <pre id="sql-schedule-view"></pre>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="step" data-step="5">
+    <div class="step-head"><span class="num">5</span><h2>İlk çalıştırma ve kontrol</h2>
+      <label class="donebox"><input type="checkbox" id="done-5"> Tamam</label></div>
+    <p>Zamanlayıcıyı beklemeden toplayıcıyı bir kez elle başlat, sonra sonucu kontrol et.</p>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">04 · şimdi-çalıştır.sql</span><button class="copy" type="button" data-copy="sql-run" id="copy-run">Kopyala</button></div>
+      <pre class="short" id="sql-run-view"></pre>
+    </div>
+    <p>1–2 dakika bekle, sonra bunu çalıştır:</p>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">05 · kontrol.sql</span><button class="copy" type="button" data-copy="sql-check" id="copy-check">Kopyala</button></div>
+      <pre class="short" id="sql-check-view"></pre>
+    </div>
+    <p>Sonuç tablosunun ekran görüntüsünü bana gönder. <code class="inline">status</code> sütununda <b>ok</b> görmeyi bekliyoruz. Tablo boşsa ya da hata varsa sorun değil; ekran görüntüsünden ne olduğunu anlarım.</p>
+  </section>
+
+  <header class="updates-head">
+    <span class="eyebrow">Kurulum bittikten sonra</span>
+    <h1 class="h1-small">Güncellemeler</h1>
+    <p class="lead">İlk kurulumu yaptıysan sadece buradaki adımları uygula; 1–5. adımları tekrarlama.</p>
+  </header>
+
+  <section class="step" data-step="u1">
+    <div class="step-head"><span class="num">U1</span><h2>15 dakikada bir toplama (v0.2.2)</h2>
+      <label class="donebox"><input type="checkbox" id="done-u1"> Tamam</label></div>
+    <p>Güncel lig 30 yerine 15 dakikada bir toplanacak; gün içi hareketler daha erken görünür.</p>
+    <ol>
+      <li><span class="ui">Edge Functions</span> → <code class="inline">collect</code> fonksiyonunu aç → <span class="ui">Code</span> sekmesi.</li>
+      <li>Oradaki kodun tamamını sil. Yukarıdaki <b>3. adımın</b> kodunu (sayfa yenilendiyse güncel sürüm) kopyalayıp yapıştır, <span class="ui">Deploy</span>'a bas.</li>
+      <li><span class="ui">SQL Editor</span> → <span class="ui">New query snippet</span>, aşağıdaki kodu yapıştır, <span class="ui">Run</span>.</li>
+    </ol>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">U1 · 15-dakika.sql</span><button class="copy" type="button" data-copy="sql-u1" id="copy-u1">Kopyala</button></div>
+      <pre class="short" id="sql-u1-view"></pre>
+    </div>
+  </section>
+
+  <section class="step" data-step="u2">
+    <div class="step-head"><span class="num">U2</span><h2>Discord alarmları (v0.3.0)</h2>
+      <label class="donebox"><input type="checkbox" id="done-u2"> Tamam</label></div>
+    <p>Fiyatlar her güncellendiğinde alarmların kontrol edilir; çalanlar seçtiğin Discord kanalına mesaj olarak düşer.</p>
+
+    <h3>a · Veritabanını güncelle</h3>
+    <p><span class="ui">SQL Editor</span> → <span class="ui">New query snippet</span>, yapıştır, <span class="ui">Run</span>. Kod mevcut verine dokunmaz, sadece alarm tablolarını ekler.</p>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">U2a · alarm-tabloları.sql</span><button class="copy" type="button" data-copy="sql-u2-migration" id="copy-u2-migration">Kopyala</button></div>
+      <pre id="sql-u2-migration-view"></pre>
+    </div>
+
+    <h3>b · Toplayıcıyı yeniden yükle</h3>
+    <p><span class="ui">Edge Functions</span> → <code class="inline">collect</code> → <span class="ui">Code</span>: içeriği sil, sayfayı yeniledikten sonra <b>3. adımın</b> güncel kodunu yapıştır, <span class="ui">Deploy</span>.</p>
+
+    <h3>c · Discord kanalını bağla</h3>
+    <ol>
+      <li>Discord'da alarmların düşeceği sunucuda kanalın yanındaki dişliye bas: <span class="ui">Edit Channel</span> → <span class="ui">Integrations</span> → <span class="ui">Webhooks</span> → <span class="ui">New Webhook</span>.</li>
+      <li><span class="ui">Copy Webhook URL</span> ile adresi kopyala ve aşağıdaki kutuya yapıştır.</li>
+    </ol>
+    <p class="note warn"><strong>Bu adres bir şifre gibidir:</strong> elinde olan herkes o kanala mesaj atabilir. Bana ya da sohbete yazma. Bu sayfa adresi hiçbir yere göndermez ve kaydetmez; sadece aşağıdaki kodu hazırlar.</p>
+    <div class="fields">
+      <div class="field">
+        <label for="webhook">Discord webhook URL</label>
+        <input id="webhook" type="url" autocomplete="off" spellcheck="false" placeholder="https://discord.com/api/webhooks/…">
+        <span class="status" id="webhook-status" aria-live="polite"></span>
+      </div>
+    </div>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">U2c · discord-bağla.sql</span><button class="copy" type="button" data-copy="sql-webhook" id="copy-webhook" disabled>Kopyala</button></div>
+      <pre class="short" id="sql-webhook-view"></pre>
+    </div>
+
+    <h3>d · Test mesajı gönder</h3>
+    <p>Çalıştır; birkaç saniye içinde Discord kanalında <b>“✅ Alerts are connected”</b> mesajı görmelisin.</p>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">U2d · test-mesajı.sql</span><button class="copy" type="button" data-copy="sql-discord-test" id="copy-discord-test">Kopyala</button></div>
+      <pre class="short" id="sql-discord-test-view"></pre>
+    </div>
+
+    <h3>e · Alarm kur</h3>
+    <p>Formu doldur, oluşan kodu SQL Editor'da çalıştır. Eşya adını poe.ninja'daki İngilizce adıyla yaz (ör. <code class="inline">Divine Orb</code>). Ad boş kalırsa kural o kategorideki <b>tüm eşyalar</b> için geçerli olur.</p>
+    <div class="fields alarm-form">
+      <div class="field">
+        <label for="al-preset">Hazır örnek</label>
+        <select id="al-preset">
+          <option value="">— seç —</option>
+          <option value="test">Deneme: Divine Orb 1 chaos'un üstünde (ilk güncellemede bir kez çalar)</option>
+          <option value="divine1h">Divine Orb 1 saatte %3 yükselirse</option>
+          <option value="scarab">Herhangi bir Scarab 1 saatte %15 yükselirse</option>
+          <option value="currencydrop">Herhangi bir Currency 1 saatte %10 düşerse</option>
+        </select>
+      </div>
+      <div class="field"><label for="al-category">Kategori</label>
+        <select id="al-category"></select></div>
+      <div class="field"><label for="al-item">Eşya adı (boş = kategorideki tümü)</label>
+        <input id="al-item" type="text" autocomplete="off" spellcheck="false" placeholder="Divine Orb"></div>
+      <div class="field"><label for="al-kind">Kural</label>
+        <select id="al-kind">
+          <option value="rise">Yüzde yükselirse</option>
+          <option value="drop">Yüzde düşerse</option>
+          <option value="above">Fiyat şu seviyenin üstüne çıkarsa</option>
+          <option value="below">Fiyat şu seviyenin altına inerse</option>
+        </select></div>
+      <div class="field"><label for="al-threshold" id="al-threshold-label">Eşik (%)</label>
+        <input id="al-threshold" type="number" min="0.1" step="0.1" value="5"></div>
+      <div class="field" id="al-window-field"><label for="al-window">Zaman aralığı</label>
+        <select id="al-window">
+          <option value="60" selected>1 saat</option><option value="180">3 saat</option>
+          <option value="360">6 saat</option><option value="720">12 saat</option><option value="1440">24 saat</option>
+        </select></div>
+      <div class="field" id="al-unit-field" hidden><label for="al-unit">Birim</label>
+        <select id="al-unit"><option value="chaos">Chaos</option><option value="divine">Divine</option></select></div>
+      <div class="field"><label for="al-league">Lig</label>
+        <select id="al-league">
+          <option value="challenge">Güncel lig (softcore)</option>
+          <option value="challenge_hc">Güncel lig (hardcore)</option>
+          <option value="standard">Standard</option>
+          <option value="hardcore">Hardcore</option>
+        </select></div>
+      <div class="field"><label for="al-confidence">En az güven</label>
+        <select id="al-confidence">
+          <option value="0">Düşük (az işlem gören eşyalar da)</option>
+          <option value="1" selected>Orta</option>
+          <option value="2">Yüksek</option>
+        </select></div>
+      <div class="field"><label for="al-cooldown">Aynı eşya için tekrar bildirme süresi (dk)</label>
+        <input id="al-cooldown" type="number" min="15" step="15" value="60"></div>
+      <div class="field field-wide"><label class="check"><input type="checkbox" id="al-confirm">
+        Sahte sıçramaya karşı koru: bir sonraki güncellemede de geçerliyse bildir (bildirim yaklaşık 1 saat gecikir)</label></div>
+    </div>
+    <p class="note">poe.ninja fiyatları yaklaşık saatte bir yenilediği için en kısa anlamlı aralık 1 saattir. Bu kurallar U3 güncellemesini gerektirir.</p>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">U2e · alarm-kur.sql</span><button class="copy" type="button" data-copy="sql-alarm" id="copy-alarm">Kopyala</button></div>
+      <pre class="short" id="sql-alarm-view"></pre>
+    </div>
+    <p>Kurduğun alarmları görmek, kapatmak ve son bildirimleri incelemek için:</p>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">U2f · alarmlarım.sql</span><button class="copy" type="button" data-copy="sql-alarm-list" id="copy-alarm-list">Kopyala</button></div>
+      <pre class="short" id="sql-alarm-list-view"></pre>
+    </div>
+  </section>
+
+  <section class="step" data-step="u3">
+    <div class="step-head"><span class="num">U3</span><h2>Saatlik poe.ninja ritmi ve sahte sıçrama koruması (v0.5.0)</h2>
+      <label class="donebox"><input type="checkbox" id="done-u3"> Tamam</label></div>
+    <p>4 Kasım gecesi ölçtük: poe.ninja kur fiyatlarını 15 dakikada bir değil, <b>yaklaşık saatte bir</b> yeniliyor. Bu güncelleme 1 saatlik değişimi bu ritme göre hesaplar. Ayrıca alarmlara isteğe bağlı bir koruma ekler: az işlem gören eşyalarda tek seferlik sıçramalar için “bir sonraki güncellemede de geçerliyse bildir”. Market sayfasının okuduğu sorgular da bu adımda kurulur.</p>
+    <p class="note">Bu adımı Claude 4 Kasım sabahı senin projene zaten uyguladı. Tekrar çalıştırmak zarar vermez; yeni bir projede ya da emin olmak istersen çalıştır.</p>
+    <p><span class="ui">SQL Editor</span> → <span class="ui">New query snippet</span>, yapıştır, <span class="ui">Run</span>.</p>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">U3 · saatlik-ritim.sql</span><button class="copy" type="button" data-copy="sql-u3-migration" id="copy-u3-migration">Kopyala</button></div>
+      <pre id="sql-u3-migration-view"></pre>
+    </div>
+  </section>
+
+  <section class="step" data-step="u4">
+    <div class="step-head"><span class="num">U4</span><h2>Geçmiş liglerle aynı gün karşılaştırması (v0.6.0)</h2>
+      <label class="donebox"><input type="checkbox" id="done-u4"> Tamam</label></div>
+    <p>Eşya sayfasına “Same day in past leagues” bölümünü ekler: bir eşyanın ligin aynı gününde (ör. 3. gün) geçmiş liglerde kaç chaos ve divine ettiği. Geçmiş lig fiyatları poe.ninja'nın herkese açık veri arşivlerinden (CC BY-SA) alınır.</p>
+    <p class="note">Bu adımı ve 6 geçmiş ligin (Mirage, Keepers, Mercenaries, Settlers, Necropolis, Affliction; softcore ve hardcore) içe aktarımını Claude 4 Kasım'da senin projene uyguladı. Tekrar çalıştırmak zarar vermez ve içe aktarılan veriyi silmez.</p>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">U4 · lig-gecmisi.sql</span><button class="copy" type="button" data-copy="sql-u4-migration" id="copy-u4-migration">Kopyala</button></div>
+      <pre id="sql-u4-migration-view"></pre>
+    </div>
+  </section>
+
+  <footer>This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</footer>
+</div>
+
+<script type="text/plain" id="sql-migration">{{MIGRATION}}</script>
+<script type="text/plain" id="ts-function">{{FUNCTION}}</script>
+<script type="text/plain" id="sql-schedule-template">{{SCHEDULE}}</script>
+<script type="text/plain" id="sql-run">-- Toplayıcıyı şimdi bir kez çalıştırır (güncel challenge ligi).
+select net.http_post(
+  url     := (select value from public.app_config where key = 'project_url') || '/functions/v1/collect?tier=fast',
+  headers := jsonb_build_object(
+               'Content-Type', 'application/json',
+               'x-collector-token', (select value from public.app_config where key = 'collector_token')),
+  body    := '{}'::jsonb,
+  timeout_milliseconds := 150000);</script>
+<script type="text/plain" id="sql-u1">-- Güncel ligi 15 dakikada bir toplar (saat başı 2, 17, 32 ve 47 geçe, UTC).
+{{FAST_JOB}}</script>
+<script type="text/plain" id="sql-u2-migration">{{MIGRATION2}}
+{{PRUNE_JOB}}</script>
+<script type="text/plain" id="sql-u3-migration">{{MIGRATION3}}</script>
+<script type="text/plain" id="sql-u4-migration">{{MIGRATION4}}</script>
+<script type="text/plain" id="sql-discord-test">-- Discord'a tek bir test mesajı gönderir.
+select net.http_post(
+  url     := (select value from public.app_config where key = 'project_url') || '/functions/v1/collect?mode=discord-test',
+  headers := jsonb_build_object(
+               'Content-Type', 'application/json',
+               'x-collector-token', (select value from public.app_config where key = 'collector_token')),
+  body    := '{}'::jsonb,
+  timeout_milliseconds := 30000);</script>
+<script type="text/plain" id="sql-alarm-list">-- Alarmların (son 7 günde kaç kez çaldıklarıyla) ve son 20 bildirim.
+select a.id, a.label, a.league_kind as lig, a.category as kategori, a.is_active as aktif, a.confirm_next as onayli,
+       (select count(*) from public.alert_events e where e.alert_id = a.id and e.fired_at > now() - interval '7 days') as son_7_gun
+from public.alerts a order by a.id;
+
+-- Bir alarmı kapatmak için: update public.alerts set is_active = false where id = 1;
+-- Son bildirimleri görmek için bu satırı çalıştır:
+-- select fired_at, item_name, kind, change_pct, now_chaos, delivered_at, error from public.alert_events order by fired_at desc limit 20;</script>
+<script type="text/plain" id="sql-check">-- Toplayıcının son çalışmaları ve poe.ninja yanıtları.
+select r.started_at, r.league_id, r.category, r.status, r.item_count, r.error,
+       (select status_code from net._http_response order by created desc limit 1) as son_http_kodu
+from public.collection_runs r
+union all
+select null, null, null, 'henüz kayıt yok', null,
+       (select left(content::text, 200) from net._http_response order by created desc limit 1),
+       (select status_code from net._http_response order by created desc limit 1)
+where not exists (select 1 from public.collection_runs)
+order by started_at desc nulls first
+limit 25;</script>
+
+<script>
+(() => {
+  const text = (id) => document.getElementById(id).textContent.replace(/^\n/, "");
+  const sources = {
+    "sql-migration": text("sql-migration"),
+    "ts-function": text("ts-function"),
+    "sql-run": text("sql-run"),
+    "sql-check": text("sql-check"),
+    "sql-u1": text("sql-u1"),
+    "sql-u2-migration": text("sql-u2-migration"),
+    "sql-u3-migration": text("sql-u3-migration"),
+    "sql-u4-migration": text("sql-u4-migration"),
+    "sql-discord-test": text("sql-discord-test"),
+    "sql-alarm-list": text("sql-alarm-list"),
+    "sql-webhook": "",
+    "sql-alarm": "",
+    "sql-schedule": "",
+  };
+  const scheduleTemplate = text("sql-schedule-template");
+  for (const id of ["sql-migration", "ts-function", "sql-run", "sql-check", "sql-u1", "sql-u2-migration", "sql-u3-migration", "sql-u4-migration", "sql-discord-test", "sql-alarm-list"]) {
+    document.getElementById(id + "-view").textContent = sources[id];
+  }
+
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  };
+
+  // ---- step 4: fill the schedule SQL from the inputs
+  const urlInput = document.getElementById("project-url");
+  const contactInput = document.getElementById("contact");
+  const urlStatus = document.getElementById("url-status");
+  const scheduleView = document.getElementById("sql-schedule-view");
+  const scheduleBtn = document.getElementById("copy-schedule");
+  const sqlString = (s) => s.replace(/'/g, "''");
+  const URL_RE = /^https:\/\/[a-z0-9]{15,30}\.supabase\.co$/;
+
+  function renderSchedule() {
+    const url = urlInput.value.trim().replace(/\/+$/, "");
+    const contact = contactInput.value.trim().replace(/[\r\n]/g, " ");
+    store.set("setup.url", urlInput.value);
+    store.set("setup.contact", contactInput.value);
+    if (!url) {
+      urlStatus.textContent = "";
+      urlStatus.className = "status";
+      scheduleView.textContent = "-- Önce yukarıya Project URL'yi yapıştır.";
+      scheduleBtn.disabled = true;
+      sources["sql-schedule"] = "";
+      return;
+    }
+    if (!URL_RE.test(url)) {
+      urlStatus.textContent = "Bu bir Supabase proje adresine benzemiyor. Biçim: https://abcdefghijklmnop.supabase.co";
+      urlStatus.className = "status bad";
+      scheduleView.textContent = "-- Geçerli bir Project URL bekleniyor.";
+      scheduleBtn.disabled = true;
+      sources["sql-schedule"] = "";
+      return;
+    }
+    urlStatus.textContent = "Adres doğru görünüyor.";
+    urlStatus.className = "status good";
+    const sql = scheduleTemplate
+      .replaceAll("__PROJECT_URL__", sqlString(url))
+      .replaceAll("__CONTACT__", sqlString(contact || "not set"));
+    if (/__[A-Z_]+__/.test(sql) || !sql.includes("'" + sqlString(url) + "'")) {
+      urlStatus.textContent = "Kod doldurulamadı. Bu sayfayı yenileyip tekrar dene.";
+      urlStatus.className = "status bad";
+      scheduleView.textContent = "-- Kod doldurulamadı.";
+      scheduleBtn.disabled = true;
+      sources["sql-schedule"] = "";
+      return;
+    }
+    sources["sql-schedule"] = sql;
+    scheduleView.textContent = sql;
+    scheduleBtn.disabled = false;
+  }
+  urlInput.value = store.get("setup.url") ?? "";
+  contactInput.value = store.get("setup.contact") ?? "";
+  urlInput.addEventListener("input", renderSchedule);
+  contactInput.addEventListener("input", renderSchedule);
+  renderSchedule();
+
+
+  // ---- U2c: Discord webhook (never stored, never sent anywhere)
+  const HOOK_RE = /^https:\/\/(?:discord|discordapp)\.com\/api\/webhooks\/\d+\/[\w-]+$/;
+  const hookInput = document.getElementById("webhook");
+  const hookStatus = document.getElementById("webhook-status");
+  const hookView = document.getElementById("sql-webhook-view");
+  const hookBtn = document.getElementById("copy-webhook");
+  function renderHook() {
+    const v = hookInput.value.trim();
+    if (!v) {
+      hookStatus.textContent = ""; hookStatus.className = "status";
+      hookView.textContent = "-- Önce yukarıya webhook adresini yapıştır.";
+      hookBtn.disabled = true; sources["sql-webhook"] = ""; return;
+    }
+    if (!HOOK_RE.test(v)) {
+      hookStatus.textContent = "Bu bir Discord webhook adresine benzemiyor. Biçim: https://discord.com/api/webhooks/123…/abc…";
+      hookStatus.className = "status bad";
+      hookView.textContent = "-- Geçerli bir webhook adresi bekleniyor.";
+      hookBtn.disabled = true; sources["sql-webhook"] = ""; return;
+    }
+    hookStatus.textContent = "Adres doğru görünüyor."; hookStatus.className = "status good";
+    const sql = "-- Discord kanalını kaydeder (gizli ayarlar tablosuna).\n" +
+      "insert into public.app_config (key, value)\nvalues ('discord_webhook_url', '" + sqlString(v) + "')\n" +
+      "on conflict (key) do update set value = excluded.value;";
+    sources["sql-webhook"] = sql;
+    hookView.textContent = sql.replace(/(webhooks\/\d+\/)[\w-]+/, "$1••••••••");  // keep the secret off the screen
+    hookBtn.disabled = false;
+  }
+  hookInput.addEventListener("input", renderHook);
+  renderHook();
+
+  // ---- U2e: alert rule builder
+  const CATEGORIES = __CATEGORIES_JSON__;
+  const f = (id) => document.getElementById(id);
+  const catSel = f("al-category");
+  for (const c of CATEGORIES) { const o = document.createElement("option"); o.value = c; o.textContent = c; catSel.append(o); }
+  const presets = {
+    test:         { category: "Currency", item: "Divine Orb", kind: "above", threshold: 1, unit: "chaos", confidence: "0", cooldown: 60, confirm: false },
+    divine1h:     { category: "Currency", item: "Divine Orb", kind: "rise", threshold: 3, window: "60", confidence: "1", cooldown: 60, confirm: false },
+    scarab:       { category: "Scarab", item: "", kind: "rise", threshold: 15, window: "60", confidence: "1", cooldown: 120, confirm: true },
+    currencydrop: { category: "Currency", item: "", kind: "drop", threshold: 10, window: "60", confidence: "1", cooldown: 120, confirm: true },
+  };
+  f("al-preset").addEventListener("change", (e) => {
+    const p = presets[e.target.value];
+    if (!p) return;
+    f("al-category").value = p.category; f("al-item").value = p.item; f("al-kind").value = p.kind;
+    f("al-threshold").value = p.threshold; f("al-confidence").value = p.confidence; f("al-cooldown").value = p.cooldown;
+    f("al-confirm").checked = !!p.confirm;
+    if (p.window) f("al-window").value = p.window;
+    if (p.unit) f("al-unit").value = p.unit;
+    f("al-league").value = "challenge";
+    renderAlarm();
+  });
+  const WINDOW_LABEL = { 15: "15m", 30: "30m", 60: "1h", 180: "3h", 360: "6h", 720: "12h", 1440: "24h" };
+  function renderAlarm() {
+    const kind = f("al-kind").value;
+    const pct = kind === "rise" || kind === "drop";
+    f("al-window-field").hidden = !pct;
+    f("al-unit-field").hidden = pct;
+    f("al-threshold-label").textContent = pct ? "Eşik (%)" : "Seviye";
+    const category = f("al-category").value;
+    const item = f("al-item").value.trim().replace(/[\r\n]/g, " ");
+    const threshold = Number(f("al-threshold").value);
+    const cooldown = Math.round(Number(f("al-cooldown").value));
+    const win = Number(f("al-window").value);
+    const unit = f("al-unit").value;
+    const league = f("al-league").value;
+    const conf = Number(f("al-confidence").value);
+    const confirm = f("al-confirm").checked;
+    const view = f("sql-alarm-view"), btn = f("copy-alarm");
+    let problem = "";
+    if (!(threshold > 0) || !Number.isFinite(threshold)) problem = "Eşik 0'dan büyük bir sayı olmalı.";
+    else if (!(cooldown >= 15)) problem = "Tekrar bildirme süresi en az 15 dakika olmalı.";
+    if (problem) { view.textContent = "-- " + problem; btn.disabled = true; sources["sql-alarm"] = ""; return; }
+
+    const who = item || ("any " + category);
+    const what = pct ? ((kind === "rise" ? "+" : "−") + threshold + "% in " + WINDOW_LABEL[win])
+                     : ((kind === "above" ? "above " : "below ") + threshold + (unit === "chaos" ? " c" : " div"));
+    const label = who + " " + what + (confirm ? " (confirmed)" : "");
+    const cols = "label, league_kind, category, item_id, kind, threshold, unit, window_minutes, min_confidence, cooldown_minutes, confirm_next";
+    const vals = (itemExpr) => "'" + sqlString(label) + "', '" + league + "', '" + sqlString(category) + "', " + itemExpr + ", '" +
+      kind + "', " + threshold + ", " + (pct ? "null" : "'" + unit + "'") + ", " + (pct ? win : "null") + ", " + conf + ", " + cooldown + ", " + confirm;
+    let sql;
+    if (item) {
+      sql = "-- Alarm: " + label + "\n" +
+        "do $al$\ndeclare v_item int;\nbegin\n" +
+        "  select id into v_item from public.items\n   where lower(name) = lower('" + sqlString(item) + "') and category = '" + sqlString(category) + "';\n" +
+        "  if v_item is null then\n" +
+        "    raise exception 'Eşya bulunamadı: \"%\" (%). Adı poe.ninja''daki gibi yaz ve kategoriyi kontrol et.', '" + sqlString(item) + "', '" + sqlString(category) + "';\n" +
+        "  end if;\n" +
+        "  insert into public.alerts (" + cols + ")\n  values (" + vals("v_item") + ");\n" +
+        "end\n$al$;";
+    } else {
+      sql = "-- Alarm: " + label + " (kategorideki tüm eşyalar)\n" +
+        "insert into public.alerts (" + cols + ")\nvalues (" + vals("null") + ");";
+    }
+    sources["sql-alarm"] = sql; view.textContent = sql; btn.disabled = false;
+  }
+  for (const id of ["al-category", "al-item", "al-kind", "al-threshold", "al-window", "al-unit", "al-league", "al-confidence", "al-cooldown", "al-confirm"]) {
+    f(id).addEventListener("input", renderAlarm);
+    f(id).addEventListener("change", renderAlarm);
+  }
+  f("al-category").value = "Currency"; f("al-item").value = "Divine Orb";
+  renderAlarm();
+
+  // ---- copy buttons
+  function selectPre(pre) {
+    const r = document.createRange();
+    r.selectNodeContents(pre);
+    const s = window.getSelection();
+    s.removeAllRanges();
+    s.addRange(r);
+  }
+  document.querySelectorAll("button.copy").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.copy;
+      const value = sources[key];
+      if (!value) return;
+      const pre = document.getElementById(key + "-view");
+      const done = (label) => {
+        btn.textContent = label;
+        btn.classList.toggle("copied", label === "Kopyalandı");
+        setTimeout(() => { btn.textContent = "Kopyala"; btn.classList.remove("copied"); }, 2200);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(value).then(() => done("Kopyalandı"), () => { selectPre(pre); done("Seçildi: Ctrl+C"); });
+      } else {
+        selectPre(pre);
+        done("Seçildi: Ctrl+C");
+      }
+    });
+  });
+
+  // ---- step checkboxes (remembered in this browser only)
+  document.querySelectorAll(".step").forEach((step) => {
+    const n = step.dataset.step;
+    const box = document.getElementById("done-" + n);
+    box.checked = store.get("setup.done." + n) === "1";
+    step.classList.toggle("done", box.checked);
+    box.addEventListener("change", () => {
+      store.set("setup.done." + n, box.checked ? "1" : "0");
+      step.classList.toggle("done", box.checked);
+    });
+  });
+})();
+</script>

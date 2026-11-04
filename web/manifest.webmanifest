@@ -1,0 +1,16 @@
+{
+  "name": "PoE Economy Tools",
+  "short_name": "PoE Economy",
+  "description": "Intraday price moves for Path of Exile currency, scarabs and more.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#12110f",
+  "theme_color": "#12110f",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

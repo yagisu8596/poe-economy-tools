@@ -1,0 +1,3338 @@
+<title>Supabase Kurulumu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@600;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one narrow column of numbered setup steps; each step is a stone slab with its own copy-ready code. */
+:root {
+  --bg: #f1f2ef;          /* cool limestone */
+  --panel: #fbfbf9;
+  --ink: #1c1e1a;
+  --muted: #5b5f57;
+  --rule: #d5d7d0;
+  --gold: #8a6418;        /* divine-orb gold, darkened for contrast on light */
+  --gold-soft: #f1e6cc;
+  --code-bg: #e8eae4;
+  --ok: #2f6b3a;
+  --warn: #9a4b12;
+  --font-display: "Cormorant SC", "Trajan Pro", Georgia, serif;
+  --font-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131412; --panel: #1b1c19; --ink: #e6e4dd; --muted: #a3a49b; --rule: #33352f;
+    --gold: #d8b25c; --gold-soft: #2c2616; --code-bg: #10110f; --ok: #7fbf87; --warn: #e39a5e;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131412; --panel: #1b1c19; --ink: #e6e4dd; --muted: #a3a49b; --rule: #33352f;
+  --gold: #d8b25c; --gold-soft: #2c2616; --code-bg: #10110f; --ok: #7fbf87; --warn: #e39a5e;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font: 16px/1.55 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+.wrap { max-width: 760px; margin: 0 auto; display: grid; gap: 20px; }
+header { display: grid; gap: 6px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); }
+.eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+h1 { font-family: var(--font-display); font-size: clamp(30px, 6vw, 42px); line-height: 1.05; margin: 0; text-wrap: balance; letter-spacing: .02em; }
+.lead { color: var(--muted); margin: 0; max-width: 62ch; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.fact { font-size: 13px; padding: 3px 10px; border: 1px solid var(--rule); border-radius: 999px; color: var(--muted); background: var(--panel); }
+.fact b { color: var(--ink); font-weight: 600; }
+
+.step { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 18px 18px 20px; display: grid; gap: 12px; min-width: 0; }
+.step.done { border-color: color-mix(in srgb, var(--ok) 45%, var(--rule)); }
+.step-head { display: flex; align-items: center; gap: 12px; }
+.num { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--font-display); font-weight: 700; font-size: 18px; color: var(--gold); border: 1.5px solid var(--gold); background: var(--gold-soft); }
+.step.done .num { color: var(--ok); border-color: var(--ok); background: transparent; }
+h2 { margin: 0; font-size: 19px; line-height: 1.25; flex: 1; text-wrap: balance; }
+.donebox { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); cursor: pointer; user-select: none; white-space: nowrap; }
+.donebox input { accent-color: var(--ok); width: 16px; height: 16px; }
+ol, ul { margin: 0; padding-left: 22px; display: grid; gap: 6px; max-width: 66ch; }
+p { margin: 0; max-width: 66ch; }
+kbd, .ui { font-family: var(--font-body); font-weight: 600; font-size: .92em; padding: 1px 6px; border-radius: 4px; background: var(--code-bg); border: 1px solid var(--rule); white-space: nowrap; }
+code.inline { font-family: var(--font-mono); font-size: .88em; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+.note { font-size: 14.5px; color: var(--muted); border-left: 3px solid var(--rule); padding-left: 12px; }
+.note.warn { border-left-color: var(--warn); color: var(--ink); }
+.note.warn strong { color: var(--warn); }
+
+.code { border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; min-width: 0; }
+.code-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px 8px 14px; background: var(--code-bg); border-bottom: 1px solid var(--rule); flex-wrap: wrap; }
+.code-name { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+pre { margin: 0; padding: 12px 14px; max-height: 260px; overflow: auto; background: var(--code-bg); font: 12.5px/1.5 var(--font-mono); color: var(--ink); white-space: pre; tab-size: 2; }
+pre.short { max-height: none; }
+button.copy { font: 600 14px var(--font-body); padding: 7px 14px; border-radius: 6px; border: 1.5px solid var(--gold); background: var(--gold); color: var(--panel); cursor: pointer; min-width: 104px; }
+button.copy:hover { filter: brightness(1.08); }
+button.copy:disabled { background: transparent; color: var(--muted); border-color: var(--rule); cursor: not-allowed; filter: none; }
+button.copy.copied { background: var(--ok); border-color: var(--ok); }
+button:focus-visible, input:focus-visible, label:focus-within { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.fields { display: grid; gap: 14px; }
+.field { display: grid; gap: 4px; }
+.field label { font-weight: 600; font-size: 14.5px; }
+.field input { font: 15px var(--font-mono); padding: 9px 11px; border-radius: 6px; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); width: 100%; min-width: 0; }
+.field .hint { font-size: 13px; color: var(--muted); }
+.field .status { font-size: 13px; font-weight: 600; }
+.field label.check { display: flex; gap: 8px; align-items: flex-start; font-weight: 400; cursor: pointer; }
+.field label.check input { width: 18px; height: 18px; flex: none; margin: 2px 0 0; accent-color: var(--accent, currentColor); }
+.status.good { color: var(--ok); } .status.bad { color: var(--warn); }
+.updates-head { margin-top: 24px; }
+h3 { margin: 6px 0 0; font-size: 15.5px; color: var(--gold); letter-spacing: .02em; }
+select { font: 15px var(--font-body); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); width: 100%; min-width: 0; }
+.alarm-form { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.h1-small { font-size: clamp(24px, 5vw, 32px); }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 14px; }
+@media (max-width: 480px) { .step-head { flex-wrap: wrap; } .donebox { margin-left: 46px; } }
+@media (prefers-reduced-motion: no-preference) { button.copy { transition: background .15s, border-color .15s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">PoE Economy Tools · v0.2.0</span>
+    <h1>Supabase Kurulumu</h1>
+    <p class="lead">Fiyat toplayıcıyı kendi Supabase hesabına beş adımda kur. Her adımda sadece bir şey kopyalayıp yapıştıracaksın; şifre ya da gizli anahtar kimseyle paylaşılmıyor, bana da gönderme.</p>
+    <div class="facts">
+      <span class="fact">Süre <b>~15 dk</b></span>
+      <span class="fact">Maliyet <b>Ücretsiz plan</b></span>
+      <span class="fact">Hedef <b>3.30 başlamadan, 13 Kasım</b></span>
+    </div>
+  </header>
+
+  <!-- 1 -->
+  <section class="step" data-step="1">
+    <div class="step-head"><span class="num">1</span><h2>Projeyi oluştur</h2>
+      <label class="donebox"><input type="checkbox" id="done-1"> Tamam</label></div>
+    <ol>
+      <li><a href="https://supabase.com/dashboard" target="_blank" rel="noopener">supabase.com/dashboard</a> adresine kendi hesabınla gir.</li>
+      <li><span class="ui">New project</span> düğmesine bas.</li>
+      <li>Project name: <code class="inline">poe-economy-tools</code></li>
+      <li>Database password: <span class="ui">Generate a password</span> ile oluştur ve bir şifre yöneticisine ya da güvenli bir yere kaydet.</li>
+      <li>Region: <b>East US (North Virginia)</b>. Plan: <b>Free</b>. Bölge sonradan değiştirilemez; listede adı biraz farklı görünürse <code class="inline">us-east-1</code> olanı seç.</li>
+      <li><span class="ui">Create new project</span> düğmesine bas ve 1–2 dakika hazırlanmasını bekle.</li>
+    </ol>
+    <p class="note warn"><strong>Veritabanı şifresini kimseyle paylaşma</strong>, bana da gönderme. Kurulumda ona ihtiyacım yok.</p>
+  </section>
+
+  <!-- 2 -->
+  <section class="step" data-step="2">
+    <div class="step-head"><span class="num">2</span><h2>Veritabanını kur</h2>
+      <label class="donebox"><input type="checkbox" id="done-2"> Tamam</label></div>
+    <ol>
+      <li>Soldaki menüden <span class="ui">SQL Editor</span>'ı aç, sonra <span class="ui">New query</span>.</li>
+      <li>Aşağıdaki kodu kopyala, editöre yapıştır ve sağ alttaki <span class="ui">Run</span>'a bas.</li>
+      <li>Altta <b>Success. No rows returned</b> görmelisin. Uyarı penceresi çıkarsa onayla; kod yalnızca yeni tablolar oluşturur.</li>
+    </ol>
+    <div class="code">
+      <div class="code-bar"><span class="code-name" id="mig-name">01 · veritabanı.sql</span><button class="copy" type="button" data-copy="sql-migration" id="copy-migration">Kopyala</button></div>
+      <pre id="sql-migration-view"></pre>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="step" data-step="3">
+    <div class="step-head"><span class="num">3</span><h2>Toplayıcıyı yükle</h2>
+      <label class="donebox"><input type="checkbox" id="done-3"> Tamam</label></div>
+    <ol>
+      <li>Soldaki menüden <span class="ui">Edge Functions</span>'ı aç.</li>
+      <li><span class="ui">Deploy a new function</span> → <span class="ui">Via Editor</span>'ı seç.</li>
+      <li>Fonksiyon adını tam olarak <code class="inline">collect</code> yap.</li>
+      <li>Editördeki örnek kodun tamamını sil, aşağıdaki kodu yapıştır.</li>
+      <li><span class="ui">Deploy function</span>'a bas ve başarı mesajını bekle (10–30 saniye).</li>
+      <li>Fonksiyonun ayar sayfasında <b>Verify JWT</b> (ya da <b>Enforce JWT verification</b>) seçeneği varsa <b>kapat</b> ve kaydet. Toplayıcı kendi gizli anahtarıyla korunuyor.</li>
+    </ol>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">02 · collect.ts</span><button class="copy" type="button" data-copy="ts-function" id="copy-function">Kopyala</button></div>
+      <pre id="ts-function-view"></pre>
+    </div>
+    <p class="note">Editör altını kırmızıyla çizdiği birkaç tip uyarısı gösterebilir; dağıtımı engellemezler.</p>
+  </section>
+
+  <!-- 4 -->
+  <section class="step" data-step="4">
+    <div class="step-head"><span class="num">4</span><h2>Zamanlayıcıyı kur</h2>
+      <label class="donebox"><input type="checkbox" id="done-4"> Tamam</label></div>
+    <p>İki bilgiyi gir; kod kendiliğinden doldurulur.</p>
+    <div class="fields">
+      <div class="field">
+        <label for="project-url">Project URL</label>
+        <input id="project-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://abcdefghijklmnop.supabase.co">
+        <span class="hint">Proje sayfasının üstündeki <span class="ui">Connect</span> düğmesinde ya da <span class="ui">Project Settings → Data API</span> sayfasında yazar. Herkese açık bir adres, gizli değil.</span>
+        <span class="status" id="url-status" aria-live="polite"></span>
+      </div>
+      <div class="field">
+        <label for="contact">poe.ninja için iletişim adresi</label>
+        <input id="contact" type="text" autocomplete="off" spellcheck="false" placeholder="ornek@eposta.com">
+        <span class="hint">poe.ninja'ya giden isteklerde görünür, sitede görünmez. Boş bırakırsan sonra eklenebilir.</span>
+      </div>
+    </div>
+    <ol>
+      <li><span class="ui">SQL Editor</span> → <span class="ui">New query</span>, kodu yapıştır, <span class="ui">Run</span>.</li>
+      <li>Altta kırmızı bir hata olmadan küçük bir sonuç tablosu görmelisin.</li>
+    </ol>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">03 · zamanlayıcı.sql</span><button class="copy" type="button" data-copy="sql-schedule" id="copy-schedule" disabled>Kopyala</button></div>
+      <pre id="sql-schedule-view"></pre>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="step" data-step="5">
+    <div class="step-head"><span class="num">5</span><h2>İlk çalıştırma ve kontrol</h2>
+      <label class="donebox"><input type="checkbox" id="done-5"> Tamam</label></div>
+    <p>Zamanlayıcıyı beklemeden toplayıcıyı bir kez elle başlat, sonra sonucu kontrol et.</p>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">04 · şimdi-çalıştır.sql</span><button class="copy" type="button" data-copy="sql-run" id="copy-run">Kopyala</button></div>
+      <pre class="short" id="sql-run-view"></pre>
+    </div>
+    <p>1–2 dakika bekle, sonra bunu çalıştır:</p>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">05 · kontrol.sql</span><button class="copy" type="button" data-copy="sql-check" id="copy-check">Kopyala</button></div>
+      <pre class="short" id="sql-check-view"></pre>
+    </div>
+    <p>Sonuç tablosunun ekran görüntüsünü bana gönder. <code class="inline">status</code> sütununda <b>ok</b> görmeyi bekliyoruz. Tablo boşsa ya da hata varsa sorun değil; ekran görüntüsünden ne olduğunu anlarım.</p>
+  </section>
+
+  <header class="updates-head">
+    <span class="eyebrow">Kurulum bittikten sonra</span>
+    <h1 class="h1-small">Güncellemeler</h1>
+    <p class="lead">İlk kurulumu yaptıysan sadece buradaki adımları uygula; 1–5. adımları tekrarlama.</p>
+  </header>
+
+  <section class="step" data-step="u1">
+    <div class="step-head"><span class="num">U1</span><h2>15 dakikada bir toplama (v0.2.2)</h2>
+      <label class="donebox"><input type="checkbox" id="done-u1"> Tamam</label></div>
+    <p>Güncel lig 30 yerine 15 dakikada bir toplanacak; gün içi hareketler daha erken görünür.</p>
+    <ol>
+      <li><span class="ui">Edge Functions</span> → <code class="inline">collect</code> fonksiyonunu aç → <span class="ui">Code</span> sekmesi.</li>
+      <li>Oradaki kodun tamamını sil. Yukarıdaki <b>3. adımın</b> kodunu (sayfa yenilendiyse güncel sürüm) kopyalayıp yapıştır, <span class="ui">Deploy</span>'a bas.</li>
+      <li><span class="ui">SQL Editor</span> → <span class="ui">New query snippet</span>, aşağıdaki kodu yapıştır, <span class="ui">Run</span>.</li>
+    </ol>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">U1 · 15-dakika.sql</span><button class="copy" type="button" data-copy="sql-u1" id="copy-u1">Kopyala</button></div>
+      <pre class="short" id="sql-u1-view"></pre>
+    </div>
+  </section>
+
+  <section class="step" data-step="u2">
+    <div class="step-head"><span class="num">U2</span><h2>Discord alarmları (v0.3.0)</h2>
+      <label class="donebox"><input type="checkbox" id="done-u2"> Tamam</label></div>
+    <p>Fiyatlar her güncellendiğinde alarmların kontrol edilir; çalanlar seçtiğin Discord kanalına mesaj olarak düşer.</p>
+
+    <h3>a · Veritabanını güncelle</h3>
+    <p><span class="ui">SQL Editor</span> → <span class="ui">New query snippet</span>, yapıştır, <span class="ui">Run</span>. Kod mevcut verine dokunmaz, sadece alarm tablolarını ekler.</p>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">U2a · alarm-tabloları.sql</span><button class="copy" type="button" data-copy="sql-u2-migration" id="copy-u2-migration">Kopyala</button></div>
+      <pre id="sql-u2-migration-view"></pre>
+    </div>
+
+    <h3>b · Toplayıcıyı yeniden yükle</h3>
+    <p><span class="ui">Edge Functions</span> → <code class="inline">collect</code> → <span class="ui">Code</span>: içeriği sil, sayfayı yeniledikten sonra <b>3. adımın</b> güncel kodunu yapıştır, <span class="ui">Deploy</span>.</p>
+
+    <h3>c · Discord kanalını bağla</h3>
+    <ol>
+      <li>Discord'da alarmların düşeceği sunucuda kanalın yanındaki dişliye bas: <span class="ui">Edit Channel</span> → <span class="ui">Integrations</span> → <span class="ui">Webhooks</span> → <span class="ui">New Webhook</span>.</li>
+      <li><span class="ui">Copy Webhook URL</span> ile adresi kopyala ve aşağıdaki kutuya yapıştır.</li>
+    </ol>
+    <p class="note warn"><strong>Bu adres bir şifre gibidir:</strong> elinde olan herkes o kanala mesaj atabilir. Bana ya da sohbete yazma. Bu sayfa adresi hiçbir yere göndermez ve kaydetmez; sadece aşağıdaki kodu hazırlar.</p>
+    <div class="fields">
+      <div class="field">
+        <label for="webhook">Discord webhook URL</label>
+        <input id="webhook" type="url" autocomplete="off" spellcheck="false" placeholder="https://discord.com/api/webhooks/…">
+        <span class="status" id="webhook-status" aria-live="polite"></span>
+      </div>
+    </div>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">U2c · discord-bağla.sql</span><button class="copy" type="button" data-copy="sql-webhook" id="copy-webhook" disabled>Kopyala</button></div>
+      <pre class="short" id="sql-webhook-view"></pre>
+    </div>
+
+    <h3>d · Test mesajı gönder</h3>
+    <p>Çalıştır; birkaç saniye içinde Discord kanalında <b>“✅ Alerts are connected”</b> mesajı görmelisin.</p>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">U2d · test-mesajı.sql</span><button class="copy" type="button" data-copy="sql-discord-test" id="copy-discord-test">Kopyala</button></div>
+      <pre class="short" id="sql-discord-test-view"></pre>
+    </div>
+
+    <h3>e · Alarm kur</h3>
+    <p>Formu doldur, oluşan kodu SQL Editor'da çalıştır. Eşya adını poe.ninja'daki İngilizce adıyla yaz (ör. <code class="inline">Divine Orb</code>). Ad boş kalırsa kural o kategorideki <b>tüm eşyalar</b> için geçerli olur.</p>
+    <div class="fields alarm-form">
+      <div class="field">
+        <label for="al-preset">Hazır örnek</label>
+        <select id="al-preset">
+          <option value="">— seç —</option>
+          <option value="test">Deneme: Divine Orb 1 chaos'un üstünde (ilk güncellemede bir kez çalar)</option>
+          <option value="divine1h">Divine Orb 1 saatte %3 yükselirse</option>
+          <option value="scarab">Herhangi bir Scarab 1 saatte %15 yükselirse</option>
+          <option value="currencydrop">Herhangi bir Currency 1 saatte %10 düşerse</option>
+        </select>
+      </div>
+      <div class="field"><label for="al-category">Kategori</label>
+        <select id="al-category"></select></div>
+      <div class="field"><label for="al-item">Eşya adı (boş = kategorideki tümü)</label>
+        <input id="al-item" type="text" autocomplete="off" spellcheck="false" placeholder="Divine Orb"></div>
+      <div class="field"><label for="al-kind">Kural</label>
+        <select id="al-kind">
+          <option value="rise">Yüzde yükselirse</option>
+          <option value="drop">Yüzde düşerse</option>
+          <option value="above">Fiyat şu seviyenin üstüne çıkarsa</option>
+          <option value="below">Fiyat şu seviyenin altına inerse</option>
+        </select></div>
+      <div class="field"><label for="al-threshold" id="al-threshold-label">Eşik (%)</label>
+        <input id="al-threshold" type="number" min="0.1" step="0.1" value="5"></div>
+      <div class="field" id="al-window-field"><label for="al-window">Zaman aralığı</label>
+        <select id="al-window">
+          <option value="60" selected>1 saat</option><option value="180">3 saat</option>
+          <option value="360">6 saat</option><option value="720">12 saat</option><option value="1440">24 saat</option>
+        </select></div>
+      <div class="field" id="al-unit-field" hidden><label for="al-unit">Birim</label>
+        <select id="al-unit"><option value="chaos">Chaos</option><option value="divine">Divine</option></select></div>
+      <div class="field"><label for="al-league">Lig</label>
+        <select id="al-league">
+          <option value="challenge">Güncel lig (softcore)</option>
+          <option value="challenge_hc">Güncel lig (hardcore)</option>
+          <option value="standard">Standard</option>
+          <option value="hardcore">Hardcore</option>
+        </select></div>
+      <div class="field"><label for="al-confidence">En az güven</label>
+        <select id="al-confidence">
+          <option value="0">Düşük (az işlem gören eşyalar da)</option>
+          <option value="1" selected>Orta</option>
+          <option value="2">Yüksek</option>
+        </select></div>
+      <div class="field"><label for="al-cooldown">Aynı eşya için tekrar bildirme süresi (dk)</label>
+        <input id="al-cooldown" type="number" min="15" step="15" value="60"></div>
+      <div class="field field-wide"><label class="check"><input type="checkbox" id="al-confirm">
+        Sahte sıçramaya karşı koru: bir sonraki güncellemede de geçerliyse bildir (bildirim yaklaşık 1 saat gecikir)</label></div>
+    </div>
+    <p class="note">poe.ninja fiyatları yaklaşık saatte bir yenilediği için en kısa anlamlı aralık 1 saattir. Bu kurallar U3 güncellemesini gerektirir.</p>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">U2e · alarm-kur.sql</span><button class="copy" type="button" data-copy="sql-alarm" id="copy-alarm">Kopyala</button></div>
+      <pre class="short" id="sql-alarm-view"></pre>
+    </div>
+    <p>Kurduğun alarmları görmek, kapatmak ve son bildirimleri incelemek için:</p>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">U2f · alarmlarım.sql</span><button class="copy" type="button" data-copy="sql-alarm-list" id="copy-alarm-list">Kopyala</button></div>
+      <pre class="short" id="sql-alarm-list-view"></pre>
+    </div>
+  </section>
+
+  <section class="step" data-step="u3">
+    <div class="step-head"><span class="num">U3</span><h2>Saatlik poe.ninja ritmi ve sahte sıçrama koruması (v0.5.0)</h2>
+      <label class="donebox"><input type="checkbox" id="done-u3"> Tamam</label></div>
+    <p>4 Kasım gecesi ölçtük: poe.ninja kur fiyatlarını 15 dakikada bir değil, <b>yaklaşık saatte bir</b> yeniliyor. Bu güncelleme 1 saatlik değişimi bu ritme göre hesaplar. Ayrıca alarmlara isteğe bağlı bir koruma ekler: az işlem gören eşyalarda tek seferlik sıçramalar için “bir sonraki güncellemede de geçerliyse bildir”. Market sayfasının okuduğu sorgular da bu adımda kurulur.</p>
+    <p class="note">Bu adımı Claude 4 Kasım sabahı senin projene zaten uyguladı. Tekrar çalıştırmak zarar vermez; yeni bir projede ya da emin olmak istersen çalıştır.</p>
+    <p><span class="ui">SQL Editor</span> → <span class="ui">New query snippet</span>, yapıştır, <span class="ui">Run</span>.</p>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">U3 · saatlik-ritim.sql</span><button class="copy" type="button" data-copy="sql-u3-migration" id="copy-u3-migration">Kopyala</button></div>
+      <pre id="sql-u3-migration-view"></pre>
+    </div>
+  </section>
+
+  <section class="step" data-step="u4">
+    <div class="step-head"><span class="num">U4</span><h2>Geçmiş liglerle aynı gün karşılaştırması (v0.6.0)</h2>
+      <label class="donebox"><input type="checkbox" id="done-u4"> Tamam</label></div>
+    <p>Eşya sayfasına “Same day in past leagues” bölümünü ekler: bir eşyanın ligin aynı gününde (ör. 3. gün) geçmiş liglerde kaç chaos ve divine ettiği. Geçmiş lig fiyatları poe.ninja'nın herkese açık veri arşivlerinden (CC BY-SA) alınır.</p>
+    <p class="note">Bu adımı ve 6 geçmiş ligin (Mirage, Keepers, Mercenaries, Settlers, Necropolis, Affliction; softcore ve hardcore) içe aktarımını Claude 4 Kasım'da senin projene uyguladı. Tekrar çalıştırmak zarar vermez ve içe aktarılan veriyi silmez.</p>
+    <div class="code">
+      <div class="code-bar"><span class="code-name">U4 · lig-gecmisi.sql</span><button class="copy" type="button" data-copy="sql-u4-migration" id="copy-u4-migration">Kopyala</button></div>
+      <pre id="sql-u4-migration-view"></pre>
+    </div>
+  </section>
+
+  <footer>This product isn't affiliated with or endorsed by Grinding Gear Games in any way.</footer>
+</div>
+
+<script type="text/plain" id="sql-migration">
+-- PoE Economy Tools — market data schema
+--
+-- Public market data collected from poe.ninja. Everything here is readable by
+-- anyone (it is public game-economy data); only the collector (service role,
+-- which bypasses RLS) writes.
+--
+-- Retention (fits the Supabase free tier, 500 MB):
+--   resolution 0 = raw collector points     kept 2 days
+--   resolution 1 = hourly averages          kept 7 days
+--   resolution 2 = daily averages           kept forever (per league)
+-- Missing prices are stored as NULL and never as 0.
+
+-- ---------------------------------------------------------------- leagues
+create table if not exists public.leagues (
+  id            text primary key,                 -- poe.ninja league id, e.g. 'Allflame'
+  name          text not null,
+  kind          text not null check (kind in ('challenge', 'challenge_hc', 'standard', 'hardcore')),
+  first_seen_at timestamptz not null default now(),
+  last_seen_at  timestamptz not null default now(),
+  is_active     boolean not null default true
+);
+
+-- ---------------------------------------------------------------- items
+create table if not exists public.items (
+  id            serial primary key,
+  ninja_id      text not null,                    -- poe.ninja line id, e.g. 'divine'
+  category      text not null,                    -- poe.ninja type, e.g. 'Currency'
+  name          text not null,
+  icon_url      text,
+  first_seen_at timestamptz not null default now(),
+  unique (ninja_id, category)
+);
+
+-- ---------------------------------------------------------------- price history
+create table if not exists public.price_points (
+  league_id       text     not null references public.leagues (id) on delete cascade,
+  item_id         int      not null references public.items (id) on delete cascade,
+  resolution      smallint not null check (resolution in (0, 1, 2)),
+  ts              timestamptz not null,
+  chaos_value     real,                            -- price of one unit in chaos
+  divine_value    real,
+  volume_chaos    real,                            -- traded value in chaos (NULL = unknown)
+  change7d_chaos  real,                            -- source 7-day trend, chaos terms
+  change7d_divine real,                            -- same, divine terms
+  confidence      smallint check (confidence in (0, 1, 2)),  -- 0 low, 1 medium, 2 high
+  primary key (league_id, item_id, resolution, ts)
+);
+
+-- ---------------------------------------------------------------- latest snapshot
+-- One row per (league, item): what the Market list and the Scanner read.
+create table if not exists public.latest_prices (
+  league_id       text not null references public.leagues (id) on delete cascade,
+  item_id         int  not null references public.items (id) on delete cascade,
+  updated_at      timestamptz not null,
+  chaos_value     real,
+  divine_value    real,
+  volume_chaos    real,
+  change7d_chaos  real,
+  change7d_divine real,
+  confidence      smallint,
+  trend_pair      text,
+  primary key (league_id, item_id)
+);
+
+-- ---------------------------------------------------------------- collector bookkeeping
+create table if not exists public.collection_state (
+  league_id          text not null,
+  category           text not null,
+  etag               text,
+  last_attempt_at    timestamptz,
+  last_success_at    timestamptz,
+  divine_chaos       real,      -- only for category 'Currency': reference for other categories
+  divine_change7d    real,
+  primary key (league_id, category)
+);
+
+create table if not exists public.collection_runs (
+  id           bigserial primary key,
+  league_id    text not null,
+  category     text not null,
+  started_at   timestamptz not null default now(),
+  status       text not null check (status in ('ok', 'not_modified', 'empty', 'error', 'rejected')),
+  divine_chaos real,
+  item_count   int,
+  warnings     jsonb,
+  error        text
+);
+create index if not exists collection_runs_started_idx on public.collection_runs (started_at desc);
+
+-- Private settings read by the collector and the cron jobs (service role only).
+-- Keys: collector_token, project_url, ninja_contact.
+create table if not exists public.app_config (
+  key   text primary key,
+  value text not null
+);
+
+-- ---------------------------------------------------------------- ingest
+-- Called by the collector with the already-normalized snapshot of one
+-- (league, category). Upserts item metadata, appends raw price points and
+-- refreshes latest_prices, all in one transaction.
+create or replace function public.ingest_snapshot(
+  p_league_id    text,
+  p_category     text,
+  p_captured_at  timestamptz,
+  p_items        jsonb
+) returns int
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_count int;
+begin
+  create temporary table _src on commit drop as
+  select *
+  from jsonb_to_recordset(p_items) as x(
+    ninja_id text, name text, icon_url text,
+    chaos_value real, divine_value real, volume_chaos real,
+    change7d_chaos real, change7d_divine real, confidence smallint, trend_pair text
+  );
+
+  insert into items (ninja_id, category, name, icon_url)
+  select s.ninja_id, p_category, s.name, s.icon_url from _src s
+  on conflict (ninja_id, category) do update
+    set name = excluded.name,
+        icon_url = coalesce(excluded.icon_url, items.icon_url)
+    where items.name is distinct from excluded.name
+       or (excluded.icon_url is not null and items.icon_url is distinct from excluded.icon_url);
+
+  -- Raw history: only rows that actually have a price.
+  insert into price_points (league_id, item_id, resolution, ts, chaos_value, divine_value,
+                            volume_chaos, change7d_chaos, change7d_divine, confidence)
+  select p_league_id, i.id, 0, p_captured_at, s.chaos_value, s.divine_value,
+         s.volume_chaos, s.change7d_chaos, s.change7d_divine, s.confidence
+  from _src s join items i on i.ninja_id = s.ninja_id and i.category = p_category
+  where s.chaos_value is not null
+  on conflict do nothing;
+
+  -- Latest view keeps unpriced items too, so the UI can show "—".
+  insert into latest_prices (league_id, item_id, updated_at, chaos_value, divine_value, volume_chaos,
+                             change7d_chaos, change7d_divine, confidence, trend_pair)
+  select p_league_id, i.id, p_captured_at, s.chaos_value, s.divine_value, s.volume_chaos,
+         s.change7d_chaos, s.change7d_divine, s.confidence, s.trend_pair
+  from _src s join items i on i.ninja_id = s.ninja_id and i.category = p_category
+  on conflict (league_id, item_id) do update set
+    updated_at = excluded.updated_at, chaos_value = excluded.chaos_value,
+    divine_value = excluded.divine_value, volume_chaos = excluded.volume_chaos,
+    change7d_chaos = excluded.change7d_chaos, change7d_divine = excluded.change7d_divine,
+    confidence = excluded.confidence, trend_pair = excluded.trend_pair;
+
+  select count(*) into v_count from _src;
+  return v_count;
+end;
+$$;
+
+-- ---------------------------------------------------------------- compaction
+-- Rolls completed hours of raw points into hourly averages and completed days of
+-- hourly points into daily averages, then deletes what is past retention.
+-- Idempotent: safe to run as often as wanted.
+create or replace function public.compact_price_points(
+  p_now timestamptz default now(),
+  p_include_daily boolean default true      -- hourly cron passes false; nightly cron true
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_hourly int; v_daily int; v_del_raw int; v_del_hourly int; v_del_runs int;
+begin
+  insert into price_points (league_id, item_id, resolution, ts, chaos_value, divine_value,
+                            volume_chaos, change7d_chaos, change7d_divine, confidence)
+  select league_id, item_id, 1, date_trunc('hour', ts, 'UTC'),
+         avg(chaos_value), avg(divine_value), avg(volume_chaos),
+         avg(change7d_chaos), avg(change7d_divine), min(confidence)
+  from price_points
+  where resolution = 0 and ts < date_trunc('hour', p_now, 'UTC')
+  group by league_id, item_id, date_trunc('hour', ts, 'UTC')
+  on conflict (league_id, item_id, resolution, ts) do update set
+    chaos_value = excluded.chaos_value, divine_value = excluded.divine_value,
+    volume_chaos = excluded.volume_chaos, change7d_chaos = excluded.change7d_chaos,
+    change7d_divine = excluded.change7d_divine, confidence = excluded.confidence;
+  get diagnostics v_hourly = row_count;
+
+  if not p_include_daily then
+    delete from price_points where resolution = 0 and ts < p_now - interval '2 days';
+    get diagnostics v_del_raw = row_count;
+    return jsonb_build_object('hourly_upserted', v_hourly, 'raw_deleted', v_del_raw);
+  end if;
+
+  insert into price_points (league_id, item_id, resolution, ts, chaos_value, divine_value,
+                            volume_chaos, change7d_chaos, change7d_divine, confidence)
+  select league_id, item_id, 2, date_trunc('day', ts, 'UTC'),
+         avg(chaos_value), avg(divine_value), avg(volume_chaos),
+         avg(change7d_chaos), avg(change7d_divine), min(confidence)
+  from price_points
+  where resolution = 1 and ts < date_trunc('day', p_now, 'UTC')
+  group by league_id, item_id, date_trunc('day', ts, 'UTC')
+  on conflict (league_id, item_id, resolution, ts) do update set
+    chaos_value = excluded.chaos_value, divine_value = excluded.divine_value,
+    volume_chaos = excluded.volume_chaos, change7d_chaos = excluded.change7d_chaos,
+    change7d_divine = excluded.change7d_divine, confidence = excluded.confidence;
+  get diagnostics v_daily = row_count;
+
+  -- Only delete raw rows whose hour has been rolled up (older than 2 days anyway).
+  delete from price_points where resolution = 0 and ts < p_now - interval '2 days';
+  get diagnostics v_del_raw = row_count;
+  -- Only delete hourly rows whose day has been rolled up.
+  delete from price_points where resolution = 1 and ts < least(p_now - interval '7 days', date_trunc('day', p_now, 'UTC'));
+  get diagnostics v_del_hourly = row_count;
+  delete from collection_runs where started_at < p_now - interval '14 days';
+  get diagnostics v_del_runs = row_count;
+
+  return jsonb_build_object('hourly_upserted', v_hourly, 'daily_upserted', v_daily,
+                            'raw_deleted', v_del_raw, 'hourly_deleted', v_del_hourly,
+                            'runs_deleted', v_del_runs);
+end;
+$$;
+
+-- ---------------------------------------------------------------- security
+alter table public.leagues          enable row level security;
+alter table public.items            enable row level security;
+alter table public.price_points     enable row level security;
+alter table public.latest_prices    enable row level security;
+alter table public.collection_runs  enable row level security;
+alter table public.collection_state enable row level security;  -- no policies: private
+alter table public.app_config       enable row level security;  -- no policies: private
+
+drop policy if exists "public read" on public.leagues;
+drop policy if exists "public read" on public.items;
+drop policy if exists "public read" on public.price_points;
+drop policy if exists "public read" on public.latest_prices;
+drop policy if exists "public read" on public.collection_runs;
+create policy "public read" on public.leagues         for select to anon, authenticated using (true);
+create policy "public read" on public.items           for select to anon, authenticated using (true);
+create policy "public read" on public.price_points    for select to anon, authenticated using (true);
+create policy "public read" on public.latest_prices   for select to anon, authenticated using (true);
+create policy "public read" on public.collection_runs for select to anon, authenticated using (true);
+
+-- The write functions run as their owner; nobody but the service role may call them.
+-- Supabase grants EXECUTE on new public functions to anon/authenticated by default,
+-- so revoking from PUBLIC alone is not enough.
+revoke all on function public.ingest_snapshot(text, text, timestamptz, jsonb) from public, anon, authenticated;
+revoke all on function public.compact_price_points(timestamptz, boolean) from public, anon, authenticated;
+grant execute on function public.ingest_snapshot(text, text, timestamptz, jsonb) to service_role;
+grant execute on function public.compact_price_points(timestamptz, boolean) to service_role;
+
+
+-- PoE Economy Tools — intraday changes and alerts (v0.3.0)
+--
+-- price_change_window(): change of every item in a league over a window
+--   (15 min, 1 h, 6 h, 24 h, …) from our own snapshots. The "then" price is the
+--   newest point at or before now − window, and only if it is not much older
+--   than that; otherwise the change is NULL (never guessed from stale data).
+--
+-- Alerts: one row per rule. A rule targets one item, or every item of a
+-- category (item_id NULL) — "tell me about any Scarab that rises 15% in 1 h".
+-- It follows a league KIND (current challenge, Standard, …) so it keeps working
+-- when a new league starts. State is kept per (alert, item).
+--   above / below : price crosses a level (chaos or divine); fires once, re-arms
+--                   when the price goes back across.
+--   rise / drop   : % change over window_minutes reaches threshold; then waits
+--                   cooldown_minutes before firing again for that item.
+-- Thin markets are skipped below min_confidence (0 low, 1 medium, 2 high).
+
+-- ---------------------------------------------------------------- changes
+create or replace function public.price_change_window(
+  p_league_id text,
+  p_window    interval,
+  p_now       timestamptz default now()
+)
+returns table (
+  item_id      int,
+  now_chaos    real,
+  now_divine   real,
+  then_chaos   real,
+  then_ts      timestamptz,
+  change_pct   real,
+  volume_chaos real,
+  confidence   smallint,
+  updated_at   timestamptz
+)
+language sql
+stable
+set search_path = public
+as $$
+  select lp.item_id, lp.chaos_value, lp.divine_value, past.chaos_value, past.ts,
+         case when past.chaos_value > 0 and lp.chaos_value is not null
+              then ((lp.chaos_value / past.chaos_value) - 1) * 100 end::real,
+         lp.volume_chaos, lp.confidence, lp.updated_at
+  from latest_prices lp
+  left join lateral (
+    select pp.chaos_value, pp.ts
+    from price_points pp
+    where pp.league_id = lp.league_id
+      and pp.item_id = lp.item_id
+      and pp.resolution in (0, 1)
+      and pp.chaos_value is not null
+      and pp.ts <= p_now - p_window
+      -- the comparison point may be at most 25% of the window (min 20 min) older than asked
+      and pp.ts >= p_now - p_window - greatest(interval '20 minutes', p_window / 4)
+    order by pp.ts desc, pp.resolution asc
+    limit 1
+  ) past on true
+  where lp.league_id = p_league_id;
+$$;
+
+-- ---------------------------------------------------------------- alert rules
+create table if not exists public.alerts (
+  id               bigserial primary key,
+  label            text,
+  league_kind      text not null default 'challenge'
+                   check (league_kind in ('challenge', 'challenge_hc', 'standard', 'hardcore')),
+  category         text not null,                  -- poe.ninja type, e.g. 'Currency', 'Scarab'
+  item_id          int references public.items (id) on delete cascade,  -- NULL = every item in category
+  kind             text not null check (kind in ('above', 'below', 'rise', 'drop')),
+  threshold        real not null check (threshold > 0),
+  unit             text check (unit in ('chaos', 'divine')),             -- for above/below
+  window_minutes   int check (window_minutes in (15, 30, 60, 180, 360, 720, 1440)),  -- for rise/drop
+  min_confidence   smallint not null default 1 check (min_confidence in (0, 1, 2)),
+  cooldown_minutes int not null default 60 check (cooldown_minutes >= 15),
+  is_active        boolean not null default true,
+  created_at       timestamptz not null default now(),
+  check ((kind in ('above', 'below') and unit is not null and window_minutes is null)
+      or (kind in ('rise', 'drop') and window_minutes is not null and unit is null))
+);
+
+create table if not exists public.alert_item_state (
+  alert_id      bigint not null references public.alerts (id) on delete cascade,
+  item_id       int    not null references public.items (id) on delete cascade,
+  armed         boolean not null default true,
+  last_fired_at timestamptz,
+  primary key (alert_id, item_id)
+);
+
+create table if not exists public.alert_events (
+  id           bigserial primary key,
+  alert_id     bigint not null references public.alerts (id) on delete cascade,
+  item_id      int    not null references public.items (id) on delete cascade,
+  item_name    text,                          -- copied at fire time so the message is self-contained
+  alert_label  text,
+  league_id    text   not null,
+  fired_at     timestamptz not null,
+  kind         text not null,
+  threshold    real not null,
+  unit         text,
+  window_minutes int,
+  now_chaos    real,
+  now_divine   real,
+  change_pct   real,
+  volume_chaos real,
+  confidence   smallint,
+  delivered_at timestamptz,
+  error        text
+);
+create index if not exists alert_events_fired_idx on public.alert_events (fired_at desc);
+
+-- ---------------------------------------------------------------- evaluation
+-- Called by the collector right after it stored a (league, category) snapshot.
+-- Returns the events that fired now (already recorded, not yet delivered).
+create or replace function public.evaluate_alerts(
+  p_league_id text,
+  p_category  text,
+  p_now       timestamptz default now(),
+  p_max_per_alert int default 10
+)
+returns setof public.alert_events
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_kind text;
+  a      alerts%rowtype;
+  r      record;
+  v_cond boolean;
+  v_val  real;
+  v_fired int;
+  st     alert_item_state%rowtype;
+  ev     alert_events%rowtype;
+begin
+  select kind into v_kind from leagues where id = p_league_id;
+  if v_kind is null then return; end if;
+
+  for a in
+    select * from alerts
+    where is_active and league_kind = v_kind and category = p_category
+    order by id
+  loop
+    v_fired := 0;
+    for r in
+      select c.*, i.id as iid, i.name as iname
+      from price_change_window(
+             p_league_id,
+             make_interval(mins => coalesce(a.window_minutes, 15)),
+             p_now) c                                    -- computed once per rule
+      join items i on i.id = c.item_id
+      where i.category = p_category
+        and (a.item_id is null or i.id = a.item_id)
+        and c.updated_at = p_now                        -- only items refreshed in this run
+        and coalesce(c.confidence, 0) >= a.min_confidence
+      order by c.volume_chaos desc nulls last
+    loop
+      insert into alert_item_state (alert_id, item_id) values (a.id, r.iid)
+      on conflict do nothing;
+      select * into st from alert_item_state where alert_id = a.id and item_id = r.iid for update;
+
+      if a.kind in ('above', 'below') then
+        v_val := case a.unit when 'chaos' then r.now_chaos else r.now_divine end;
+        continue when v_val is null;
+        v_cond := (a.kind = 'above' and v_val >= a.threshold)
+               or (a.kind = 'below' and v_val <= a.threshold);
+        if not v_cond then
+          if not st.armed then
+            update alert_item_state set armed = true where alert_id = a.id and item_id = r.iid;
+          end if;
+          continue;
+        end if;
+        continue when not st.armed;
+        update alert_item_state set armed = false, last_fired_at = p_now
+          where alert_id = a.id and item_id = r.iid;
+      else
+        continue when r.change_pct is null;
+        v_cond := (a.kind = 'rise' and r.change_pct >= a.threshold)
+               or (a.kind = 'drop' and r.change_pct <= -a.threshold);
+        continue when not v_cond;
+        continue when st.last_fired_at is not null
+                  and p_now - st.last_fired_at < make_interval(mins => a.cooldown_minutes);
+        update alert_item_state set last_fired_at = p_now
+          where alert_id = a.id and item_id = r.iid;
+      end if;
+
+      insert into alert_events (alert_id, item_id, item_name, alert_label, league_id, fired_at, kind, threshold, unit,
+                                window_minutes, now_chaos, now_divine, change_pct, volume_chaos, confidence)
+      values (a.id, r.iid, r.iname, a.label, p_league_id, p_now, a.kind, a.threshold, a.unit,
+              a.window_minutes, r.now_chaos, r.now_divine, r.change_pct, r.volume_chaos, r.confidence)
+      returning * into ev;
+      return next ev;
+
+      v_fired := v_fired + 1;
+      exit when v_fired >= p_max_per_alert;
+    end loop;
+  end loop;
+end;
+$$;
+
+create or replace function public.mark_alert_delivery(p_ids bigint[], p_error text default null)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update alert_events
+     set delivered_at = case when p_error is null then now() end,
+         error = p_error
+   where id = any(p_ids);
+$$;
+
+-- Keep two weeks of alert history.
+create or replace function public.prune_alert_events(p_now timestamptz default now())
+returns int
+language sql
+security definer
+set search_path = public
+as $$
+  with d as (delete from alert_events where fired_at < p_now - interval '14 days' returning 1)
+  select count(*)::int from d;
+$$;
+
+-- ---------------------------------------------------------------- security
+-- Alert rules and events are private for now (single owner, no accounts yet).
+alter table public.alerts           enable row level security;
+alter table public.alert_item_state enable row level security;
+alter table public.alert_events     enable row level security;
+
+revoke all on function public.evaluate_alerts(text, text, timestamptz, int) from public, anon, authenticated;
+revoke all on function public.mark_alert_delivery(bigint[], text) from public, anon, authenticated;
+revoke all on function public.prune_alert_events(timestamptz) from public, anon, authenticated;
+grant execute on function public.evaluate_alerts(text, text, timestamptz, int) to service_role;
+grant execute on function public.mark_alert_delivery(bigint[], text) to service_role;
+grant execute on function public.prune_alert_events(timestamptz) to service_role;
+-- price_change_window is read-only over public data: anyone may call it.
+grant execute on function public.price_change_window(text, interval, timestamptz) to anon, authenticated, service_role;
+
+
+-- PoE Economy Tools — read functions for the Market page (v0.4.0)
+-- Both are read-only over public market data and callable with the publishable key.
+
+-- One row per item of a league: current price + intraday changes from our own
+-- snapshots (NULL until enough history exists — never guessed) + the source's
+-- 7-day trend.
+create or replace function public.market_overview(p_league_id text, p_now timestamptz default now())
+returns table (
+  item_id         int,
+  ninja_id        text,
+  name            text,
+  category        text,
+  icon_url        text,
+  chaos_value     real,
+  divine_value    real,
+  volume_chaos    real,
+  confidence      smallint,
+  updated_at      timestamptz,
+  change_1h       real,
+  change_6h       real,
+  change_24h      real,
+  change7d_chaos  real,
+  change7d_divine real
+)
+language sql
+stable
+set search_path = public
+as $$
+  select i.id, i.ninja_id, i.name, i.category, i.icon_url,
+         lp.chaos_value, lp.divine_value, lp.volume_chaos, lp.confidence, lp.updated_at,
+         h1.change_pct, h6.change_pct, h24.change_pct,
+         lp.change7d_chaos, lp.change7d_divine
+  from latest_prices lp
+  join items i on i.id = lp.item_id
+  left join price_change_window(p_league_id, interval '1 hour', p_now)   h1  on h1.item_id  = lp.item_id
+  left join price_change_window(p_league_id, interval '6 hours', p_now)  h6  on h6.item_id  = lp.item_id
+  left join price_change_window(p_league_id, interval '24 hours', p_now) h24 on h24.item_id = lp.item_id
+  where lp.league_id = p_league_id;
+$$;
+
+-- Price line for one item over the last p_hours, at the finest resolution we
+-- still keep for each stretch of time: daily for old data, hourly for the last
+-- week, raw (15-min) points for the most recent hours.
+create or replace function public.price_history(
+  p_league_id text,
+  p_item_id   int,
+  p_hours     int,
+  p_now       timestamptz default now()
+)
+returns table (ts timestamptz, chaos_value real, divine_value real, volume_chaos real)
+language sql
+stable
+set search_path = public
+as $$
+  with pts as (
+    select resolution, pp.ts, pp.chaos_value, pp.divine_value, pp.volume_chaos
+    from price_points pp
+    where pp.league_id = p_league_id and pp.item_id = p_item_id
+      and pp.ts >= p_now - make_interval(hours => p_hours)
+      and pp.chaos_value is not null
+  ),
+  edge as (
+    select
+      (select min(ts) from pts where resolution = 1) as hourly_start,
+      (select max(ts) + interval '1 hour' from pts where resolution = 1) as hourly_end,
+      (select max(ts) + interval '1 day' from pts where resolution = 2) as daily_end
+  )
+  select p.ts, p.chaos_value, p.divine_value, p.volume_chaos
+  from pts p, edge e
+  where case
+          -- short ranges: raw points only
+          when p_hours <= 48 then p.resolution = 0
+          -- hourly rows wherever we still have them (last ~7 days)
+          when p.resolution = 1 then true
+          -- daily rows only for the time before hourly coverage begins
+          when p.resolution = 2 then p.ts < coalesce(e.hourly_start, 'infinity')
+          -- raw rows only for what no rollup covers yet
+          else p.ts >= coalesce(e.hourly_end, e.daily_end, '-infinity')
+        end
+  order by p.ts;
+$$;
+
+grant execute on function public.market_overview(text, timestamptz) to anon, authenticated, service_role;
+grant execute on function public.price_history(text, int, int, timestamptz) to anon, authenticated, service_role;
+
+
+-- PoE Economy Tools — v0.5.0: fit the intraday maths to poe.ninja's real cadence
+--
+-- Measured on 2026-11-04: poe.ninja publishes new exchange prices about once an
+-- hour (not every 15 min), at varying minutes. Two consequences:
+--
+-- 1. price_change_window() used "the newest point at or before now − window, at
+--    most 20 min older". With ~45–75 min gaps between real updates the 1 h
+--    change was often NULL. It now picks the point CLOSEST to now − window
+--    within a tolerance band on both sides:
+--        tolerance = greatest(25 min, window / 4)
+--        accepted age = [greatest(window − tolerance, window / 2), window + tolerance]
+--    1 h → 35–85 min, 6 h → 4.5–7.5 h, 24 h → 18–30 h. Outside the band the
+--    change stays NULL (never guessed). 15/30 min windows will mostly be NULL
+--    until poe.ninja publishes more often; that is honest, not a bug.
+--
+-- 2. False spikes: thin items sometimes jump for one update and fall back
+--    (Ancient Orb 15.85c → 6.01c in one update). New per-rule option
+--    alerts.confirm_next: the rule fires only if its condition still holds on the
+--    item's NEXT refreshed update (≈ 1 h later). Off by default.
+--
+-- Safe to run more than once.
+
+-- ---------------------------------------------------------------- changes
+create or replace function public.price_change_window(
+  p_league_id text,
+  p_window    interval,
+  p_now       timestamptz default now()
+)
+returns table (
+  item_id      int,
+  now_chaos    real,
+  now_divine   real,
+  then_chaos   real,
+  then_ts      timestamptz,
+  change_pct   real,
+  volume_chaos real,
+  confidence   smallint,
+  updated_at   timestamptz
+)
+language sql
+stable
+set search_path = public
+as $$
+  with band as (
+    select p_now - p_window as target,
+           greatest(interval '25 minutes', p_window / 4) as tol
+  )
+  select lp.item_id, lp.chaos_value, lp.divine_value, past.chaos_value, past.ts,
+         case when past.chaos_value > 0 and lp.chaos_value is not null
+              then ((lp.chaos_value / past.chaos_value) - 1) * 100 end::real,
+         lp.volume_chaos, lp.confidence, lp.updated_at
+  from latest_prices lp
+  cross join band
+  left join lateral (
+    select pp.chaos_value, pp.ts
+    from price_points pp
+    where pp.league_id = lp.league_id
+      and pp.item_id = lp.item_id
+      and pp.resolution in (0, 1)
+      and pp.chaos_value is not null
+      and pp.ts >= band.target - band.tol
+      and pp.ts <= least(band.target + band.tol, p_now - p_window / 2)
+    order by abs(extract(epoch from (pp.ts - band.target))), pp.resolution asc, pp.ts desc
+    limit 1
+  ) past on true
+  where lp.league_id = p_league_id;
+$$;
+
+-- ---------------------------------------------------------------- confirm option
+alter table public.alerts           add column if not exists confirm_next boolean not null default false;
+alter table public.alert_item_state add column if not exists pending_since timestamptz;
+
+-- ---------------------------------------------------------------- evaluation
+create or replace function public.evaluate_alerts(
+  p_league_id text,
+  p_category  text,
+  p_now       timestamptz default now(),
+  p_max_per_alert int default 10
+)
+returns setof public.alert_events
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_kind text;
+  a      alerts%rowtype;
+  r      record;
+  v_cond boolean;
+  v_val  real;
+  v_fired int;
+  st     alert_item_state%rowtype;
+  ev     alert_events%rowtype;
+begin
+  select kind into v_kind from leagues where id = p_league_id;
+  if v_kind is null then return; end if;
+
+  for a in
+    select * from alerts
+    where is_active and league_kind = v_kind and category = p_category
+    order by id
+  loop
+    v_fired := 0;
+    for r in
+      select c.*, i.id as iid, i.name as iname
+      from price_change_window(
+             p_league_id,
+             make_interval(mins => coalesce(a.window_minutes, 15)),
+             p_now) c                                    -- computed once per rule
+      join items i on i.id = c.item_id
+      where i.category = p_category
+        and (a.item_id is null or i.id = a.item_id)
+        and c.updated_at = p_now                        -- only items refreshed in this run
+        and coalesce(c.confidence, 0) >= a.min_confidence
+      order by c.volume_chaos desc nulls last
+    loop
+      insert into alert_item_state (alert_id, item_id) values (a.id, r.iid)
+      on conflict do nothing;
+      select * into st from alert_item_state where alert_id = a.id and item_id = r.iid for update;
+
+      if a.kind in ('above', 'below') then
+        v_val := case a.unit when 'chaos' then r.now_chaos else r.now_divine end;
+        continue when v_val is null;
+        v_cond := (a.kind = 'above' and v_val >= a.threshold)
+               or (a.kind = 'below' and v_val <= a.threshold);
+        if not v_cond then
+          if not st.armed or st.pending_since is not null then
+            update alert_item_state set armed = true, pending_since = null
+             where alert_id = a.id and item_id = r.iid;
+          end if;
+          continue;
+        end if;
+        continue when not st.armed;
+      else
+        if r.change_pct is null then
+          continue;                                     -- no comparison point: keep any pending state
+        end if;
+        v_cond := (a.kind = 'rise' and r.change_pct >= a.threshold)
+               or (a.kind = 'drop' and r.change_pct <= -a.threshold);
+        if not v_cond then
+          if st.pending_since is not null then
+            update alert_item_state set pending_since = null where alert_id = a.id and item_id = r.iid;
+          end if;
+          continue;
+        end if;
+        continue when st.last_fired_at is not null
+                  and p_now - st.last_fired_at < make_interval(mins => a.cooldown_minutes);
+      end if;
+
+      -- Condition holds. With confirm_next the first sighting only arms a pending
+      -- state; the next refreshed update (within 3 h) that still meets it fires.
+      if a.confirm_next and (st.pending_since is null or p_now - st.pending_since > interval '3 hours') then
+        update alert_item_state set pending_since = p_now where alert_id = a.id and item_id = r.iid;
+        continue;
+      end if;
+      continue when a.confirm_next and st.pending_since >= p_now;  -- same run evaluated twice
+
+      update alert_item_state
+         set last_fired_at = p_now,
+             pending_since = null,
+             armed = case when a.kind in ('above', 'below') then false else armed end
+       where alert_id = a.id and item_id = r.iid;
+
+      insert into alert_events (alert_id, item_id, item_name, alert_label, league_id, fired_at, kind, threshold, unit,
+                                window_minutes, now_chaos, now_divine, change_pct, volume_chaos, confidence)
+      values (a.id, r.iid, r.iname, a.label, p_league_id, p_now, a.kind, a.threshold, a.unit,
+              a.window_minutes, r.now_chaos, r.now_divine, r.change_pct, r.volume_chaos, r.confidence)
+      returning * into ev;
+      return next ev;
+
+      v_fired := v_fired + 1;
+      exit when v_fired >= p_max_per_alert;
+    end loop;
+  end loop;
+end;
+$$;
+
+revoke all on function public.evaluate_alerts(text, text, timestamptz, int) from public, anon, authenticated;
+grant execute on function public.evaluate_alerts(text, text, timestamptz, int) to service_role;
+grant execute on function public.price_change_window(text, interval, timestamptz) to anon, authenticated, service_role;
+
+
+-- PoE Economy Tools — v0.6.0: compare an item's price on the same league day
+-- across leagues ("Divine Orb on day 3: Mirage 97.9 c, Keepers …, this league …").
+--
+-- Past leagues come from poe.ninja's public data dumps (https://poe.ninja/poe1/data,
+-- licensed CC BY-SA): one price per item per day. We keep only Currency Exchange
+-- style items (currency, fragments, scarabs, essences, …) of the challenge
+-- leagues (softcore and hardcore), one row per (league, item) with a daily array:
+--   prices[1] = league day 1 (launch day, UTC date), prices[2] = day 2, …
+--   NULL = no reliable price that day (poe.ninja marked it Low confidence).
+-- The current league is compared with our own snapshots.
+--
+-- Safe to run more than once.
+
+-- ---------------------------------------------------------------- league start
+alter table public.leagues add column if not exists started_on date;
+-- Curse of the Allflame (3.29) launched on 2026-07-24. Later leagues default to
+-- the day our collector first saw them (it sees a new league on launch day).
+update public.leagues set started_on = date '2026-07-24'
+ where id in ('Allflame', 'Hardcore Allflame') and started_on is null;
+
+create or replace function public.league_start(p_league_id text)
+returns date
+language sql
+stable
+set search_path = public
+as $$
+  select coalesce(started_on, (first_seen_at at time zone 'UTC')::date) from leagues where id = p_league_id;
+$$;
+
+-- ---------------------------------------------------------------- history
+create table if not exists public.league_history (
+  league      text not null,                 -- 'Mirage', 'Hardcore Mirage'
+  kind        text not null check (kind in ('challenge', 'challenge_hc')),
+  version     text,                          -- '3.28' when known
+  started_on  date not null,
+  item_name   text not null,
+  category    text not null,
+  prices      real[] not null,               -- chaos per unit by league day (1-based)
+  imported_at timestamptz not null default now(),
+  primary key (league, item_name)
+);
+create index if not exists league_history_item_idx on public.league_history (lower(item_name), kind);
+
+alter table public.league_history enable row level security;
+drop policy if exists "public read" on public.league_history;
+create policy "public read" on public.league_history for select to anon, authenticated using (true);
+
+-- Imports are written by a one-off, time-limited token (app_config keys
+-- history_import_token / history_import_expires). Nothing else may write.
+create or replace function public.import_league_history(p_token text, p_rows jsonb)
+returns int
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare n int;
+begin
+  if p_token is null or length(p_token) < 32
+     or p_token is distinct from (select value from app_config where key = 'history_import_token')
+     or coalesce((select value from app_config where key = 'history_import_expires')::timestamptz, '-infinity') < now() then
+    raise exception 'history import not allowed' using errcode = '42501';
+  end if;
+  insert into league_history (league, kind, version, started_on, item_name, category, prices, imported_at)
+  select x.league, x.kind, x.version, x.started_on, x.item_name, x.category, x.prices, now()
+  from jsonb_to_recordset(p_rows) as x(league text, kind text, version text, started_on date,
+                                       item_name text, category text, prices real[])
+  where x.league is not null and x.item_name is not null and x.prices is not null
+  on conflict (league, item_name) do update
+    set kind = excluded.kind, version = excluded.version, started_on = excluded.started_on,
+        category = excluded.category, prices = excluded.prices, imported_at = excluded.imported_at;
+  get diagnostics n = row_count;
+  return n;
+end;
+$$;
+revoke all on function public.import_league_history(text, jsonb) from public;
+grant execute on function public.import_league_history(text, jsonb) to anon, authenticated, service_role;
+
+-- ---------------------------------------------------------------- comparison
+-- Price of one item on league day p_day (default: today's day of the current
+-- league) in every past league of the same kind, plus the current league.
+-- divine = chaos / that league's Divine Orb chaos price on the same day.
+create or replace function public.league_day_compare(
+  p_league_id text,
+  p_item_id   int,
+  p_day       int default null,
+  p_now       timestamptz default now()
+)
+returns table (
+  league      text,
+  version     text,
+  started_on  date,
+  is_current  boolean,
+  day         int,
+  chaos_value real,
+  divine_value real,
+  league_days int
+)
+language sql
+stable
+set search_path = public
+as $$
+  with cur as (
+    select l.id, l.kind, league_start(l.id) as s from leagues l where l.id = p_league_id
+  ), d as (
+    select coalesce(p_day, ((p_now at time zone 'UTC')::date - cur.s) + 1) as n from cur
+  ), it as (
+    select name from items where id = p_item_id
+  ),
+  past as (
+    select h.league, h.version, h.started_on, false as is_current, d.n as day,
+           h.prices[d.n] as chaos_value,
+           case when lower(h.item_name) = 'divine orb' then case when h.prices[d.n] is not null then 1::real end
+                else h.prices[d.n] / nullif(dv.prices[d.n], 0) end::real as divine_value,
+           cardinality(h.prices) as league_days
+    from league_history h
+    cross join d cross join it cross join cur
+    left join league_history dv on dv.league = h.league and lower(dv.item_name) = 'divine orb'
+    where lower(h.item_name) = lower(it.name)
+      and h.kind = (case when cur.kind = 'challenge_hc' then 'challenge_hc' else 'challenge' end)
+  ),
+  now_row as (
+    -- current league: the live price when asking about today, else that day's average snapshot
+    select cur.id as league, null::text as version, cur.s as started_on, true as is_current, d.n as day,
+           case when p_day is null or d.n = ((p_now at time zone 'UTC')::date - cur.s) + 1
+                then lp.chaos_value else dayavg.c end::real as chaos_value,
+           case when p_day is null or d.n = ((p_now at time zone 'UTC')::date - cur.s) + 1
+                then lp.divine_value else dayavg.dv end::real as divine_value,
+           (((p_now at time zone 'UTC')::date - cur.s) + 1)::int as league_days
+    from cur cross join d
+    left join latest_prices lp on lp.league_id = cur.id and lp.item_id = p_item_id
+    left join lateral (
+      select avg(pp.chaos_value) as c, avg(pp.divine_value) as dv
+      from price_points pp
+      where pp.league_id = cur.id and pp.item_id = p_item_id
+        and pp.ts >= (cur.s + (d.n - 1))::timestamp at time zone 'UTC'
+        and pp.ts <  (cur.s + d.n)::timestamp at time zone 'UTC'
+    ) dayavg on true
+  )
+  select * from now_row
+  union all
+  select * from past
+  order by is_current desc, started_on desc;
+$$;
+
+-- Daily series for an overlay chart: one row per league with prices by league day.
+-- The current league's series is built from our snapshots (daily averages).
+create or replace function public.league_day_series(
+  p_league_id text,
+  p_item_id   int,
+  p_now       timestamptz default now()
+)
+returns table (
+  league     text,
+  version    text,
+  started_on date,
+  is_current boolean,
+  prices     real[]
+)
+language sql
+stable
+set search_path = public
+as $$
+  with cur as (
+    select l.id, l.kind, league_start(l.id) as s from leagues l where l.id = p_league_id
+  ), it as (
+    select name from items where id = p_item_id
+  ), days as (
+    select g as n from cur, generate_series(1, greatest(1, ((p_now at time zone 'UTC')::date - cur.s) + 1)) g
+  ), mine as (
+    select days.n, avg(pp.chaos_value)::real as c
+    from cur cross join days
+    left join price_points pp
+      on pp.league_id = cur.id and pp.item_id = p_item_id
+     and pp.ts >= (cur.s + (days.n - 1))::timestamp at time zone 'UTC'
+     and pp.ts <  (cur.s + days.n)::timestamp at time zone 'UTC'
+    group by days.n
+  )
+  select cur.id, null::text, cur.s, true, (select array_agg(c order by n) from mine)
+  from cur
+  union all
+  select h.league, h.version, h.started_on, false, h.prices
+  from league_history h cross join it cross join cur
+  where lower(h.item_name) = lower(it.name)
+    and h.kind = (case when cur.kind = 'challenge_hc' then 'challenge_hc' else 'challenge' end)
+  order by 4 desc, 3 desc;
+$$;
+
+grant execute on function public.league_start(text) to anon, authenticated, service_role;
+grant execute on function public.league_day_compare(text, int, int, timestamptz) to anon, authenticated, service_role;
+grant execute on function public.league_day_series(text, int, timestamptz) to anon, authenticated, service_role;
+</script>
+<script type="text/plain" id="ts-function">
+// PoE Economy Tools — Edge Function `collect` (single-file build for the Supabase dashboard).
+// Generated by scripts/bundle-collect.mjs — do not edit by hand.
+import { createClient } from "npm:@supabase/supabase-js@2";
+
+// ===== _shared/normalize.ts =====
+/**
+ * Market data normalization for poe.ninja "exchange overview" responses.
+ *
+ * Endpoint: GET /poe1/api/economy/exchange/current/overview?league={league}&type={type}
+ *
+ * Field meanings (verified against live data on 2026-11-04):
+ *  - core.primary            reference currency of every primaryValue (expected: "chaos")
+ *  - core.rates[id]          how many units of `id` ONE primary unit buys.
+ *                            rates.divine = 0.002489  =>  1 chaos = 0.002489 divine
+ *                            => divine price in chaos = 1 / rates.divine (≈ 401.8).
+ *                            Reading this as "divine price" is the classic inversion bug.
+ *  - line.primaryValue       price of ONE unit of the item, in primary currency (chaos).
+ *  - line.volumePrimaryValue traded value expressed in chaos (NOT a unit count).
+ *                            The time window is not documented by poe.ninja.
+ *  - line.maxVolumeRate      units of THIS item per ONE unit of maxVolumeCurrency
+ *                            (24.73 annul per 1 divine). Never use it as a price.
+ *  - line.sparkline.data     cumulative % change over ~7 points (not prices!) of the item's
+ *                            price measured in ITS maxVolumeCurrency (the docs: "price-trend
+ *                            samples for the highest-volume pair"). So annul (pair: divine)
+ *                            reports its change vs Divine, alt (pair: chaos) vs Chaos.
+ *                            Verified 2026-11-04: divine (pair chaos) +17.25% matches the
+ *                            classic stash endpoint's divine paySparkLine +17.10%, and chaos
+ *                            (pair divine) -14.71% compounds with it to ~0% chaos-in-chaos.
+ *                            The v1.0.0 prototype inverted these, flipping every trend sign.
+ *
+ * Rules enforced here (from the project brief):
+ *  - Missing / invalid prices become null, never 0.
+ *  - Missing volume becomes null, never 0.
+ *  - The Divine/Chaos ratio is validated before anything else is trusted.
+ */
+
+export type Confidence = "high" | "medium" | "low";
+
+export interface RawExchangeLine {
+  id: string;
+  primaryValue?: number | null;
+  volumePrimaryValue?: number | null;
+  maxVolumeCurrency?: string | null;
+  maxVolumeRate?: number | null;
+  sparkline?: { totalChange?: number | null; data?: (number | null)[] } | null;
+}
+
+export interface RawExchangeOverview {
+  core: {
+    primary: string;
+    secondary?: string;
+    rates: Record<string, number>;
+    items?: { id: string; name: string; category?: string }[];
+  };
+  lines: RawExchangeLine[];
+  items?: { id: string; name: string; category?: string; detailsId?: string }[];
+}
+
+export interface NormalizedItem {
+  id: string;
+  name: string;
+  category: string | null;
+  /** Price of one unit in Chaos Orbs. null = unknown (never 0 as a stand-in). */
+  chaosValue: number | null;
+  /** Price of one unit in Divine Orbs. null when chaosValue is null. */
+  divineValue: number | null;
+  /** Traded value in Chaos (window not documented by the source). null = unavailable. */
+  volumeChaos: number | null;
+  /** Approximate number of units behind the volume figure. */
+  approxUnitsTraded: number | null;
+  /** Currency the source measured the trend against (the highest-volume pair). */
+  trendPair: string | null;
+  /** 7-day % change in Chaos terms (converted from the pair when needed). */
+  change7dPctChaos: number | null;
+  /**
+   * 7-day % change in Divine terms (removes Chaos inflation).
+   * null when it cannot be derived safely.
+   */
+  change7dPctDivine: number | null;
+  confidence: Confidence;
+  /** Plain-language reasons why confidence is not "high", or why data is missing. */
+  notes: string[];
+}
+
+export interface NormalizedSnapshot {
+  league: string;
+  category: string;
+  fetchedAt: string;
+  divinePriceChaos: number;
+  /** % change of Divine measured in Chaos over the sparkline window. */
+  divineChange7dPct: number | null;
+  items: NormalizedItem[];
+  warnings: string[];
+}
+
+export class DataIntegrityError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "DataIntegrityError";
+  }
+}
+
+/** Plausible range for 1 Divine in Chaos. Outside it we refuse the whole snapshot. */
+export const DIVINE_SANITY_RANGE = { min: 20, max: 5000 } as const;
+/** Two independent Divine readings must agree within this fraction. */
+const DIVINE_AGREEMENT_TOLERANCE = 0.03;
+/** maxVolumeRate cross-check tolerance before we attach a warning. */
+const CROSS_CHECK_TOLERANCE = 0.15;
+
+const isPositiveNumber = (v: unknown): v is number =>
+  typeof v === "number" && Number.isFinite(v) && v > 0;
+const isNonNegativeNumber = (v: unknown): v is number =>
+  typeof v === "number" && Number.isFinite(v) && v >= 0;
+const isFiniteNumber = (v: unknown): v is number =>
+  typeof v === "number" && Number.isFinite(v);
+
+/**
+ * Determine the Divine price in Chaos from two independent fields and make sure
+ * they agree and are plausible. Throws DataIntegrityError otherwise.
+ */
+export function resolveDivinePrice(raw: RawExchangeOverview): number {
+  if (raw?.core?.primary !== "chaos") {
+    throw new DataIntegrityError(
+      `Expected primary currency "chaos", got "${raw?.core?.primary}". Refusing to guess a conversion.`,
+    );
+  }
+  const rate = raw.core.rates?.divine;
+  const fromRate = isPositiveNumber(rate) ? 1 / rate : null;
+  const divineLine = raw.lines?.find((l) => l.id === "divine");
+  const fromLine = isPositiveNumber(divineLine?.primaryValue) ? divineLine!.primaryValue! : null;
+
+  const candidate = fromLine ?? fromRate;
+  if (candidate === null) {
+    throw new DataIntegrityError("No usable Divine price in response (neither rates.divine nor a divine line).");
+  }
+  if (fromLine !== null && fromRate !== null) {
+    const diff = Math.abs(fromLine - fromRate) / fromLine;
+    if (diff > DIVINE_AGREEMENT_TOLERANCE) {
+      throw new DataIntegrityError(
+        `Divine price readings disagree: line=${fromLine}, 1/rate=${fromRate.toFixed(2)} (${(diff * 100).toFixed(1)}%).`,
+      );
+    }
+  }
+  if (candidate < DIVINE_SANITY_RANGE.min || candidate > DIVINE_SANITY_RANGE.max) {
+    throw new DataIntegrityError(
+      `Divine price ${candidate} chaos is outside the plausible range ` +
+        `${DIVINE_SANITY_RANGE.min}–${DIVINE_SANITY_RANGE.max}. Possible inversion; snapshot rejected.`,
+    );
+  }
+  return candidate;
+}
+
+/**
+ * Initial heuristic. Thin markets produce fake "+100%" signals, so the scanner
+ * must be able to hide or label them.
+ */
+export function classifyConfidence(
+  chaosValue: number | null,
+  volumeChaos: number | null,
+): { confidence: Confidence; approxUnits: number | null; notes: string[] } {
+  if (chaosValue === null) return { confidence: "low", approxUnits: null, notes: ["No price data."] };
+  if (volumeChaos === null) return { confidence: "low", approxUnits: null, notes: ["No volume data."] };
+  const units = volumeChaos / chaosValue;
+  // Expensive items (Mirror) trade in few units, so "few units" alone is not thin:
+  // low = about one unit changed hands, or the whole market is worth < 100 chaos.
+  if (units < 2 || volumeChaos < 100) {
+    return {
+      confidence: "low",
+      approxUnits: units,
+      notes: [`Very few trades (~${formatUnits(units)} units, ${Math.round(volumeChaos)} chaos). Price can move easily.`],
+    };
+  }
+  if (units < 20 || volumeChaos < 2000) {
+    return { confidence: "medium", approxUnits: units, notes: ["Moderate trading volume."] };
+  }
+  return { confidence: "high", approxUnits: units, notes: [] };
+}
+
+function formatUnits(u: number): string {
+  return u < 10 ? u.toFixed(1) : String(Math.round(u));
+}
+
+/**
+ * Convert a Chaos-terms % change into Divine terms.
+ * (1 + item%) / (1 + divine%) − 1, where divine% is Divine's change in Chaos.
+ */
+export function toDivineTermsChange(itemPctChaos: number | null, divinePctChaos: number | null): number | null {
+  if (!isFiniteNumber(itemPctChaos) || !isFiniteNumber(divinePctChaos)) return null;
+  const denom = 1 + divinePctChaos / 100;
+  if (denom <= 0) return null;
+  return ((1 + itemPctChaos / 100) / denom - 1) * 100;
+}
+
+/** Compound two % changes: (1 + a)(1 + b) − 1. */
+export function compoundChange(a: number | null, b: number | null): number | null {
+  if (!isFiniteNumber(a) || !isFiniteNumber(b)) return null;
+  return ((1 + a / 100) * (1 + b / 100) - 1) * 100;
+}
+
+/**
+ * Express a pair-relative trend in Chaos and Divine terms.
+ * divineVsChaos = Divine's own change measured in Chaos.
+ */
+export function trendInBothUnits(
+  pairChange: number | null,
+  pair: string | null | undefined,
+  divineVsChaos: number | null,
+): { chaos: number | null; divine: number | null } {
+  if (!isFiniteNumber(pairChange)) return { chaos: null, divine: null };
+  if (pair === "chaos") return { chaos: pairChange, divine: toDivineTermsChange(pairChange, divineVsChaos) };
+  if (pair === "divine") return { chaos: compoundChange(pairChange, divineVsChaos), divine: pairChange };
+  // Other pairs (rare) would need that pair's own trend; refuse to guess.
+  return { chaos: null, divine: null };
+}
+
+/** Implied chaos price from maxVolumeRate, for cross-checking only. */
+export function impliedPriceFromMaxVolume(line: RawExchangeLine, divinePriceChaos: number): number | null {
+  if (!isPositiveNumber(line.maxVolumeRate)) return null;
+  if (line.maxVolumeCurrency === "chaos") return 1 / line.maxVolumeRate;
+  if (line.maxVolumeCurrency === "divine") return divinePriceChaos / line.maxVolumeRate;
+  return null;
+}
+
+/**
+ * Divine reference taken from the same league's Currency overview. Other
+ * categories (Scarab, Essence, …) carry only core.rates.divine and no divine
+ * line, so they borrow Divine's 7-day trend from here.
+ */
+export interface DivineContext {
+  divinePriceChaos: number;
+  divineChange7dPct: number | null;
+}
+
+/** Categories are fetched minutes apart and Divine moves fast late in a league. */
+const CONTEXT_WARN_TOLERANCE = 0.1;
+const CONTEXT_REJECT_TOLERANCE = 0.25;
+
+export function normalizeExchangeOverview(
+  raw: RawExchangeOverview,
+  meta: { league: string; category: string; fetchedAt?: string; context?: DivineContext },
+): NormalizedSnapshot {
+  const divinePriceChaos = resolveDivinePrice(raw);
+  const warnings: string[] = [];
+
+  if (meta.context) {
+    const ref = meta.context.divinePriceChaos;
+    const diff = Math.abs(divinePriceChaos - ref) / ref;
+    if (diff > CONTEXT_REJECT_TOLERANCE) {
+      throw new DataIntegrityError(
+        `${meta.category}: Divine ${divinePriceChaos.toFixed(1)}c differs from Currency's ${ref.toFixed(1)}c by ${(diff * 100).toFixed(0)}%.`,
+      );
+    }
+    if (diff > CONTEXT_WARN_TOLERANCE) {
+      warnings.push(`Divine ${divinePriceChaos.toFixed(1)}c vs Currency ${ref.toFixed(1)}c (${(diff * 100).toFixed(0)}% apart).`);
+    }
+  }
+
+  const names = new Map<string, { name: string; category: string | null }>();
+  for (const it of [...(raw.core.items ?? []), ...(raw.items ?? [])]) {
+    names.set(it.id, { name: it.name, category: it.category ?? null });
+  }
+
+  // Divine's trend is only usable as the Chaos<->Divine bridge when it was
+  // measured against Chaos.
+  const divineLine = raw.lines.find((l) => l.id === "divine");
+  const ownDivineChange =
+    divineLine?.maxVolumeCurrency === "chaos" && isFiniteNumber(divineLine?.sparkline?.totalChange)
+      ? divineLine!.sparkline!.totalChange!
+      : null;
+  const divineChange7dPct = ownDivineChange ?? meta.context?.divineChange7dPct ?? null;
+  if (divineChange7dPct === null) warnings.push("Divine trend vs Chaos unavailable; 7-day changes left empty.");
+
+  const seen = new Set<string>();
+  const items: NormalizedItem[] = [];
+  for (const line of raw.lines ?? []) {
+    if (!line?.id) {
+      warnings.push("Skipped a line without id.");
+      continue;
+    }
+    if (seen.has(line.id)) {
+      warnings.push(`Duplicate line "${line.id}" ignored.`);
+      continue;
+    }
+    seen.add(line.id);
+
+    const notes: string[] = [];
+    const chaosValue = isPositiveNumber(line.primaryValue) ? line.primaryValue : null;
+    if (chaosValue === null) notes.push("Source gave no valid price.");
+    const volumeChaos = isNonNegativeNumber(line.volumePrimaryValue) ? line.volumePrimaryValue : null;
+
+    if (chaosValue !== null) {
+      const implied = impliedPriceFromMaxVolume(line, divinePriceChaos);
+      if (implied !== null && Math.abs(implied - chaosValue) / chaosValue > CROSS_CHECK_TOLERANCE) {
+        warnings.push(
+          `"${line.id}": primaryValue ${chaosValue} vs implied ${implied.toFixed(4)} from maxVolumeRate differ by >${CROSS_CHECK_TOLERANCE * 100}%.`,
+        );
+        notes.push("Price sources disagree.");
+      }
+    }
+
+    const pairChange = isFiniteNumber(line.sparkline?.totalChange) ? line.sparkline!.totalChange! : null;
+    const trend =
+      line.id === "chaos"
+        ? { chaos: 0, divine: pairChange } // chaos never moves in chaos terms
+        : line.id === "divine"
+          ? { chaos: divineChange7dPct, divine: 0 }
+          : trendInBothUnits(pairChange, line.maxVolumeCurrency, divineChange7dPct);
+    const conf = classifyConfidence(chaosValue, volumeChaos);
+    const info = names.get(line.id);
+
+    items.push({
+      id: line.id,
+      name: info?.name ?? line.id,
+      category: info?.category ?? null,
+      chaosValue,
+      divineValue: chaosValue === null ? null : chaosValue / divinePriceChaos,
+      volumeChaos,
+      approxUnitsTraded: conf.approxUnits,
+      trendPair: line.maxVolumeCurrency ?? null,
+      change7dPctChaos: trend.chaos,
+      change7dPctDivine: trend.divine,
+      confidence: conf.confidence,
+      notes: [...notes, ...conf.notes],
+    });
+  }
+
+  return {
+    league: meta.league,
+    category: meta.category,
+    fetchedAt: meta.fetchedAt ?? new Date().toISOString(),
+    divinePriceChaos,
+    divineChange7dPct,
+    items,
+    warnings,
+  };
+}
+
+/**
+ * Display rule from the brief: total >= 1 Divine -> show Divine, else Chaos.
+ * null -> "—" (never "0").
+ */
+export function formatValue(chaos: number | null, divinePriceChaos: number): { main: string; alt: string | null } {
+  if (chaos === null || !Number.isFinite(chaos)) return { main: "—", alt: null };
+  const div = chaos / divinePriceChaos;
+  const fmt = (n: number) =>
+    n >= 100 ? Math.round(n).toLocaleString("en-US") : n >= 10 ? n.toFixed(1) : n >= 1 ? n.toFixed(2) : n.toFixed(3);
+  if (div >= 1) return { main: `${fmt(div)} div`, alt: `${fmt(chaos)} c` };
+  return { main: `${fmt(chaos)} c`, alt: `${fmt(div)} div` };
+}
+
+
+// ===== _shared/alerts.ts =====
+/**
+ * Alert delivery: turns fired alert events into Discord webhook messages.
+ * Pure formatting + an injected fetch, so it is tested without network.
+ * All text here is user-facing and therefore English.
+ */
+
+export interface AlertEvent {
+  id: number;
+  alert_id: number;
+  item_id: number;
+  item_name: string | null;
+  alert_label: string | null;
+  league_id: string;
+  fired_at: string;
+  kind: "above" | "below" | "rise" | "drop";
+  threshold: number;
+  unit: "chaos" | "divine" | null;
+  window_minutes: number | null;
+  now_chaos: number | null;
+  now_divine: number | null;
+  change_pct: number | null;
+  volume_chaos: number | null;
+  confidence: number | null;
+}
+
+export interface DiscordEmbed {
+  title: string;
+  description: string;
+  color: number;
+  timestamp: string;
+  footer: { text: string };
+}
+export interface DiscordPayload {
+  username: string;
+  content?: string;
+  embeds?: DiscordEmbed[];
+  allowed_mentions: { parse: string[] };
+}
+
+const GREEN = 0x2f9e44;
+const RED = 0xc92a2a;
+const FOOTER = "PoE Economy Tools · prices via poe.ninja · not affiliated with Grinding Gear Games";
+const CONFIDENCE = ["low", "medium", "high"];
+/** Discord allows at most 10 embeds per message. */
+const EMBEDS_PER_MESSAGE = 10;
+
+export const DISCORD_WEBHOOK_RE = /^https:\/\/(?:discord|discordapp)\.com\/api\/webhooks\/\d+\/[\w-]+$/;
+
+export function windowLabel(minutes: number | null): string {
+  if (!minutes) return "";
+  if (minutes < 60) return `${minutes}m`;
+  if (minutes % 60 === 0 && minutes < 1440) return `${minutes / 60}h`;
+  if (minutes === 1440) return "24h";
+  return `${minutes}m`;
+}
+
+function compactChaos(v: number): string {
+  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
+  if (v >= 10_000) return `${Math.round(v / 1000)}k`;
+  if (v >= 1000) return `${(v / 1000).toFixed(1)}k`;
+  return String(Math.round(v));
+}
+
+function signed(pct: number): string {
+  const s = pct.toFixed(1);
+  return pct > 0 ? `+${s}%` : pct < 0 ? `−${s.replace("-", "")}%` : "0.0%";
+}
+
+export function formatEvent(e: AlertEvent): DiscordEmbed {
+  const name = e.item_name ?? `Item #${e.item_id}`;
+  const up = e.kind === "rise" || e.kind === "above";
+  let title: string;
+  if (e.kind === "rise" || e.kind === "drop") {
+    const pct = e.change_pct === null ? "?" : signed(e.change_pct);
+    title = `${up ? "📈" : "📉"} ${name} ${pct} in ${windowLabel(e.window_minutes)}`;
+  } else {
+    const lvl = `${e.threshold} ${e.unit === "divine" ? "div" : "c"}`;
+    title = `🔔 ${name} ${e.kind === "above" ? "rose above" : "fell below"} ${lvl}`;
+  }
+
+  const divinePrice = e.now_chaos && e.now_divine ? e.now_chaos / e.now_divine : null;
+  const price = divinePrice ? formatValue(e.now_chaos, divinePrice) : { main: "—", alt: null };
+  const lines = [
+    `**Now:** ${price.main}${price.alt ? ` (${price.alt})` : ""}`,
+    `**League:** ${e.league_id}`,
+    `**Traded:** ${e.volume_chaos === null ? "—" : `${compactChaos(e.volume_chaos)} c`} · **Confidence:** ${
+      e.confidence === null ? "—" : CONFIDENCE[e.confidence]
+    }`,
+  ];
+  if (e.alert_label) lines.push(`**Rule:** ${e.alert_label}`);
+  lines.push("_Check the live rate in game before you trade._");
+
+  return { title, description: lines.join("\n"), color: up ? GREEN : RED, timestamp: e.fired_at, footer: { text: FOOTER } };
+}
+
+export function buildPayloads(events: AlertEvent[]): { payload: DiscordPayload; ids: number[] }[] {
+  const out: { payload: DiscordPayload; ids: number[] }[] = [];
+  for (let i = 0; i < events.length; i += EMBEDS_PER_MESSAGE) {
+    const chunk = events.slice(i, i + EMBEDS_PER_MESSAGE);
+    out.push({
+      payload: { username: "PoE Economy Tools", embeds: chunk.map(formatEvent), allowed_mentions: { parse: [] } },
+      ids: chunk.map((e) => e.id),
+    });
+  }
+  return out;
+}
+
+export function testPayload(at: string): DiscordPayload {
+  return {
+    username: "PoE Economy Tools",
+    embeds: [{
+      title: "✅ Alerts are connected",
+      description: "This channel will receive price alerts from PoE Economy Tools.",
+      color: GREEN,
+      timestamp: at,
+      footer: { text: FOOTER },
+    }],
+    allowed_mentions: { parse: [] },
+  };
+}
+
+export type PostJson = (url: string, body: unknown) => Promise<{ status: number; retryAfterMs: number | null }>;
+
+/**
+ * Sends one payload; on HTTP 429 waits the time Discord asks for (max 5 s) and
+ * tries once more. Returns null on success, or an error text.
+ */
+export async function sendDiscord(
+  post: PostJson,
+  sleep: (ms: number) => Promise<void>,
+  webhookUrl: string,
+  payload: DiscordPayload,
+): Promise<string | null> {
+  if (!DISCORD_WEBHOOK_RE.test(webhookUrl)) return "Discord webhook URL is not valid";
+  for (let attempt = 0; attempt < 2; attempt++) {
+    let res: { status: number; retryAfterMs: number | null };
+    try {
+      res = await post(webhookUrl, payload);
+    } catch (e) {
+      return `Discord unreachable: ${e instanceof Error ? e.message : String(e)}`;
+    }
+    if (res.status >= 200 && res.status < 300) return null;
+    if (res.status === 429 && attempt === 0) {
+      await sleep(Math.min(res.retryAfterMs ?? 1000, 5000));
+      continue;
+    }
+    if (res.status === 404 || res.status === 401) return `Discord rejected the webhook (HTTP ${res.status}); it may have been deleted`;
+    return `Discord HTTP ${res.status}`;
+  }
+  return "Discord rate limit";
+}
+
+
+// ===== _shared/collector.ts =====
+/**
+ * Collector core: fetch poe.ninja exchange overviews for the tracked leagues,
+ * normalize them, hand them to a store. No I/O of its own — fetch, storage and
+ * the clock are injected so this runs the same in tests and in the Edge Function.
+ *
+ * poe.ninja rules followed here (https://poe.ninja/docs/api):
+ *  - one backend fetches for everyone; never per-user traffic
+ *  - conditional requests (ETag / If-None-Match), no cache-busting
+ *  - descriptive User-Agent with a contact
+ *  - modest volume: sequential requests, a pause between them, and a
+ *    per-(league, category) minimum interval so repeated triggers are no-ops
+ */
+
+
+export const NINJA_BASE = "https://poe.ninja/poe1/api/economy";
+
+/** PoE 1 exchange categories per https://poe.ninja/docs/api (2026-11-04). Currency must stay first. */
+export const EXCHANGE_CATEGORIES = [
+  "Currency",
+  "Fragment",
+  "Scarab",
+  "Essence",
+  "Fossil",
+  "Resonator",
+  "Oil",
+  "DeliriumOrb",
+  "DivinationCard",
+  "Omen",
+  "Tattoo",
+  "Runegraft",
+  "Astrolabe",
+  "Artifact",
+  "EnshroudingCrystal",
+  "DjinnCoin",
+  "Ducat",
+  "AllflameEmber",
+] as const;
+
+export type LeagueKind = "challenge" | "challenge_hc" | "standard" | "hardcore";
+export interface League {
+  id: string;
+  name: string;
+  kind: LeagueKind;
+}
+
+/** fast = current challenge softcore (default view); slow = the other three. */
+export type Tier = "fast" | "slow";
+export const TIER_KINDS: Record<Tier, LeagueKind[]> = {
+  fast: ["challenge"],
+  slow: ["challenge_hc", "standard", "hardcore"],
+};
+/** A (league, category) is skipped if it was attempted more recently than this. */
+// fast runs every 15 min (poe.ninja refreshes PoE1 about every 15 min); slow runs hourly.
+export const MIN_INTERVAL_MS: Record<Tier, number> = { fast: 12 * 60_000, slow: 50 * 60_000 };
+
+export interface FetchResult {
+  status: number;
+  etag: string | null;
+  body: unknown;
+}
+
+export interface CategoryState {
+  etag: string | null;
+  lastAttemptAt: string | null;
+  lastSuccessAt: string | null;
+  divineChaos: number | null;
+  divineChange7d: number | null;
+}
+
+export type RunStatus = "ok" | "not_modified" | "empty" | "error" | "rejected";
+
+export interface Store {
+  upsertLeagues(leagues: League[], seenAt: string): Promise<void>;
+  getState(leagueId: string, category: string): Promise<CategoryState | null>;
+  setState(leagueId: string, category: string, state: CategoryState): Promise<void>;
+  ingest(leagueId: string, category: string, capturedAt: string, items: IngestItem[]): Promise<number>;
+  recordRun(run: {
+    leagueId: string;
+    category: string;
+    startedAt: string;
+    status: RunStatus;
+    divineChaos: number | null;
+    itemCount: number | null;
+    warnings: string[];
+    error: string | null;
+  }): Promise<void>;
+}
+
+export interface IngestItem {
+  ninja_id: string;
+  name: string;
+  icon_url: string | null;
+  chaos_value: number | null;
+  divine_value: number | null;
+  volume_chaos: number | null;
+  change7d_chaos: number | null;
+  change7d_divine: number | null;
+  confidence: 0 | 1 | 2;
+  trend_pair: string | null;
+}
+
+/** Optional alert hooks: evaluated after each stored snapshot, delivered once per run. */
+export interface AlertHooks {
+  evaluate(leagueId: string, category: string, at: string): Promise<AlertEvent[]>;
+  deliver(events: AlertEvent[]): Promise<void>;
+}
+
+export interface CollectorDeps {
+  fetchJson(url: string, etag: string | null): Promise<FetchResult>;
+  store: Store;
+  now(): Date;
+  sleep(ms: number): Promise<void>;
+  alerts?: AlertHooks;
+}
+
+export interface CollectOptions {
+  tier: Tier;
+  categories?: readonly string[];
+  /** Stop starting new requests after this long; the next run picks up the rest. */
+  budgetMs?: number;
+  /** Pause between upstream requests. */
+  gapMs?: number;
+}
+
+export interface CollectSummary {
+  tier: Tier;
+  leagues: string[];
+  results: { leagueId: string; category: string; status: RunStatus | "skipped"; items?: number; note?: string }[];
+  stoppedEarly: boolean;
+  alerts: { fired: number; errors: string[] };
+}
+
+/**
+ * Map poe.ninja's league list to our league kinds. The first entry is the current
+ * challenge league; its hardcore twin is "Hardcore <name>". Anything else (events,
+ * private leagues) is ignored.
+ */
+export function classifyLeagues(list: unknown): League[] {
+  if (!Array.isArray(list) || list.length === 0) return [];
+  const entries = list
+    .filter((l): l is { id: string; name?: string } => !!l && typeof (l as { id?: unknown }).id === "string")
+    .map((l) => ({ id: l.id, name: typeof l.name === "string" ? l.name : l.id }));
+  if (entries.length === 0) return [];
+  const out: League[] = [];
+  const first = entries[0];
+  const isPermanent = (id: string) => id === "Standard" || id === "Hardcore";
+  if (!isPermanent(first.id)) out.push({ ...first, kind: "challenge" });
+  for (const e of entries) {
+    if (e.id === "Standard") out.push({ ...e, kind: "standard" });
+    else if (e.id === "Hardcore") out.push({ ...e, kind: "hardcore" });
+    else if (!isPermanent(first.id) && e.id === `Hardcore ${first.id}`) out.push({ ...e, kind: "challenge_hc" });
+  }
+  return out;
+}
+
+const CONFIDENCE_CODE = { low: 0, medium: 1, high: 2 } as const;
+
+export function toIngestItems(items: NormalizedItem[], icons: Map<string, string | null>): IngestItem[] {
+  return items.map((i) => ({
+    ninja_id: i.id,
+    name: i.name,
+    icon_url: icons.get(i.id) ?? null,
+    chaos_value: i.chaosValue,
+    divine_value: i.divineValue,
+    volume_chaos: i.volumeChaos,
+    change7d_chaos: i.change7dPctChaos,
+    change7d_divine: i.change7dPctDivine,
+    confidence: CONFIDENCE_CODE[i.confidence],
+    trend_pair: i.trendPair,
+  }));
+}
+
+/** poe.ninja serves item images as relative paths under /gen/image/… */
+export function iconMap(raw: RawExchangeOverview & { items?: { id: string; image?: string }[] }): Map<string, string | null> {
+  const m = new Map<string, string | null>();
+  for (const it of raw.items ?? []) {
+    const img = (it as { image?: string }).image;
+    m.set(it.id, typeof img === "string" && img.startsWith("/") ? `https://poe.ninja${img}` : null);
+  }
+  return m;
+}
+
+export async function collect(deps: CollectorDeps, opts: CollectOptions): Promise<CollectSummary> {
+  const summary: CollectSummary = {
+    tier: opts.tier, leagues: [], results: [], stoppedEarly: false, alerts: { fired: 0, errors: [] },
+  };
+  const fired: AlertEvent[] = [];
+  try {
+    await collectPrices(deps, opts, summary, fired);
+  } finally {
+    // Whatever happened to the prices, deliver what already fired.
+    if (fired.length && deps.alerts) {
+      try {
+        await deps.alerts.deliver(fired);
+      } catch (e) {
+        summary.alerts.errors.push(`deliver: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    }
+  }
+  return summary;
+}
+
+async function collectPrices(
+  deps: CollectorDeps,
+  opts: CollectOptions,
+  summary: CollectSummary,
+  fired: AlertEvent[],
+): Promise<CollectSummary> {
+  const { store } = deps;
+  const startMs = deps.now().getTime();
+  const budget = opts.budgetMs ?? 100_000;
+  const gap = opts.gapMs ?? 400;
+  const categories = opts.categories ?? EXCHANGE_CATEGORIES;
+
+  // Leagues
+  const leaguesRes = await deps.fetchJson(`${NINJA_BASE}/leagues`, null);
+  if (leaguesRes.status !== 200) throw new Error(`poe.ninja leagues: HTTP ${leaguesRes.status}`);
+  const all = classifyLeagues(leaguesRes.body);
+  if (all.length === 0) throw new Error("poe.ninja returned no usable leagues");
+  await store.upsertLeagues(all, deps.now().toISOString());
+  const leagues = all.filter((l) => TIER_KINDS[opts.tier].includes(l.kind));
+  summary.leagues = leagues.map((l) => l.id);
+
+  let requests = 0;
+  for (const league of leagues) {
+    let context: DivineContext | null = null;
+
+    for (const category of categories) {
+      if (deps.now().getTime() - startMs > budget) {
+        summary.stoppedEarly = true;
+        return summary;
+      }
+      const state = (await store.getState(league.id, category)) ?? {
+        etag: null, lastAttemptAt: null, lastSuccessAt: null, divineChaos: null, divineChange7d: null,
+      };
+      if (category === "Currency" && state.divineChaos) {
+        context = { divinePriceChaos: state.divineChaos, divineChange7dPct: state.divineChange7d };
+      }
+      const nowIso = deps.now().toISOString();
+      if (state.lastAttemptAt && deps.now().getTime() - Date.parse(state.lastAttemptAt) < MIN_INTERVAL_MS[opts.tier]) {
+        summary.results.push({ leagueId: league.id, category, status: "skipped", note: "attempted recently" });
+        continue;
+      }
+      if (category !== "Currency" && !context) {
+        summary.results.push({ leagueId: league.id, category, status: "skipped", note: "no Divine reference yet" });
+        continue;
+      }
+
+      // Claim before fetching, so overlapping triggers cannot double-request poe.ninja.
+      await store.setState(league.id, category, { ...state, lastAttemptAt: nowIso });
+
+      if (requests > 0) await deps.sleep(gap);
+      if (deps.now().getTime() - startMs > budget) {
+        await store.setState(league.id, category, state); // release the claim for the next run
+        summary.stoppedEarly = true;
+        return summary;
+      }
+      requests++;
+      const url = `${NINJA_BASE}/exchange/current/overview?league=${encodeURIComponent(league.id)}&type=${encodeURIComponent(category)}`;
+      const base = { leagueId: league.id, category, startedAt: nowIso };
+      let res: FetchResult;
+      try {
+        res = await deps.fetchJson(url, state.etag);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        await store.setState(league.id, category, { ...state, lastAttemptAt: nowIso });
+        await store.recordRun({ ...base, status: "error", divineChaos: null, itemCount: null, warnings: [], error: msg });
+        summary.results.push({ leagueId: league.id, category, status: "error", note: msg });
+        continue;
+      }
+
+      if (res.status === 304) {
+        await store.setState(league.id, category, { ...state, lastAttemptAt: nowIso });
+        await store.recordRun({ ...base, status: "not_modified", divineChaos: null, itemCount: null, warnings: [], error: null });
+        summary.results.push({ leagueId: league.id, category, status: "not_modified" });
+        continue;
+      }
+      if (res.status === 404 || (res.status === 200 && !hasLines(res.body))) {
+        // Category not offered in this league (e.g. a league mechanic that ended).
+        await store.setState(league.id, category, { ...state, etag: res.etag, lastAttemptAt: nowIso });
+        await store.recordRun({ ...base, status: "empty", divineChaos: null, itemCount: 0, warnings: [], error: null });
+        summary.results.push({ leagueId: league.id, category, status: "empty" });
+        continue;
+      }
+      if (res.status !== 200) {
+        const msg = `HTTP ${res.status}`;
+        await store.setState(league.id, category, { ...state, lastAttemptAt: nowIso });
+        await store.recordRun({ ...base, status: "error", divineChaos: null, itemCount: null, warnings: [], error: msg });
+        summary.results.push({ leagueId: league.id, category, status: "error", note: msg });
+        if (res.status === 429) {
+          summary.stoppedEarly = true; // back off entirely; try again next scheduled run
+          return summary;
+        }
+        continue;
+      }
+
+      const raw = res.body as RawExchangeOverview;
+      try {
+        const snap = normalizeExchangeOverview(raw, {
+          league: league.id,
+          category,
+          fetchedAt: nowIso,
+          context: category === "Currency" ? undefined : context ?? undefined,
+        });
+        const count = await store.ingest(league.id, category, nowIso, toIngestItems(snap.items, iconMap(raw)));
+        const next: CategoryState = { ...state, etag: res.etag, lastAttemptAt: nowIso, lastSuccessAt: nowIso };
+        if (category === "Currency") {
+          next.divineChaos = snap.divinePriceChaos;
+          next.divineChange7d = snap.divineChange7dPct;
+          context = { divinePriceChaos: snap.divinePriceChaos, divineChange7dPct: snap.divineChange7dPct };
+        }
+        await store.setState(league.id, category, next);
+        await store.recordRun({ ...base, status: "ok", divineChaos: snap.divinePriceChaos, itemCount: count, warnings: snap.warnings, error: null });
+        summary.results.push({ leagueId: league.id, category, status: "ok", items: count });
+        if (deps.alerts) {
+          // Alert problems must never stop price collection.
+          try {
+            const events = await deps.alerts.evaluate(league.id, category, nowIso);
+            fired.push(...events);
+            summary.alerts.fired += events.length;
+          } catch (e) {
+            summary.alerts.errors.push(`${league.id}/${category}: ${e instanceof Error ? e.message : String(e)}`);
+          }
+        }
+      } catch (e) {
+        const rejected = e instanceof DataIntegrityError;
+        const msg = e instanceof Error ? e.message : String(e);
+        // Do not store the ETag of rejected data, so the next run re-checks it.
+        await store.setState(league.id, category, { ...state, lastAttemptAt: nowIso });
+        await store.recordRun({ ...base, status: rejected ? "rejected" : "error", divineChaos: null, itemCount: null, warnings: [], error: msg });
+        summary.results.push({ leagueId: league.id, category, status: rejected ? "rejected" : "error", note: msg });
+      }
+    }
+  }
+  return summary;
+}
+
+function hasLines(body: unknown): boolean {
+  return !!body && Array.isArray((body as { lines?: unknown }).lines) && (body as { lines: unknown[] }).lines.length > 0;
+}
+
+
+// ===== collect/index.ts =====
+/**
+ * Supabase Edge Function: collect
+ *
+ * Triggered by pg_cron (see supabase/setup/schedule.sql):
+ *   POST /functions/v1/collect?tier=fast   every 15 min  (current challenge softcore)
+ *   POST /functions/v1/collect?tier=slow   hourly        (challenge HC, Standard, Hardcore)
+ *   POST /functions/v1/collect?mode=discord-test           (sends one test message to Discord)
+ *
+ * After each stored (league, category) snapshot the alert rules are evaluated in
+ * the database (evaluate_alerts); everything that fired is sent to the Discord
+ * webhook in app_config ('discord_webhook_url') once per run.
+ *
+ * Auth: deployed with verify_jwt = false and protected by a token kept in the
+ * private table app_config (key 'collector_token'); the cron job sends it in
+ * the x-collector-token header. The per-category minimum interval in the
+ * collector is a second line of defence against repeated calls.
+ */
+
+
+
+const VERSION = "0.3.0";
+
+Deno.serve(async (req) => {
+  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+    auth: { persistSession: false },
+  });
+
+  const config = await loadConfig(supabase);
+  const token = req.headers.get("x-collector-token");
+  if (!config.collector_token || token !== config.collector_token) {
+    return new Response("Forbidden", { status: 403 });
+  }
+
+  const params = new URL(req.url).searchParams;
+  const tier: Tier = params.get("tier") === "slow" ? "slow" : "fast";
+  const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+  const postJson: PostJson = async (url, body) => {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(10_000),
+    });
+    await res.body?.cancel();
+    const retry = Number(res.headers.get("retry-after"));
+    return { status: res.status, retryAfterMs: Number.isFinite(retry) && retry > 0 ? retry * 1000 : null };
+  };
+
+  if (params.get("mode") === "discord-test") {
+    const hook = config.discord_webhook_url;
+    if (!hook) return Response.json({ ok: false, error: "No Discord webhook saved yet" }, { status: 400 });
+    const error = await sendDiscord(postJson, sleep, hook, testPayload(new Date().toISOString()));
+    return Response.json({ ok: !error, error }, { status: error ? 502 : 200 });
+  }
+
+  const alerts: AlertHooks = {
+    async evaluate(leagueId, category, at) {
+      const { data, error } = await supabase.rpc("evaluate_alerts", {
+        p_league_id: leagueId,
+        p_category: category,
+        p_now: at,
+      });
+      if (error) throw error;
+      return (data ?? []) as AlertEvent[];
+    },
+    async deliver(events) {
+      const hook = config.discord_webhook_url;
+      for (const { payload, ids } of buildPayloads(events)) {
+        const error = hook ? await sendDiscord(postJson, sleep, hook, payload) : "No Discord webhook saved yet";
+        await supabase.rpc("mark_alert_delivery", { p_ids: ids, p_error: error });
+      }
+    },
+  };
+  const userAgent = `poe-economy-tools/${VERSION} (contact: ${config.ninja_contact ?? "not set"})`;
+
+  const fetchJson = async (url: string, etag: string | null) => {
+    const headers: Record<string, string> = { "User-Agent": userAgent, Accept: "application/json" };
+    if (etag) headers["If-None-Match"] = etag;
+    const res = await fetch(url, { headers, signal: AbortSignal.timeout(20_000) });
+    const body = res.status === 200 ? await res.json() : (await res.body?.cancel(), null);
+    return { status: res.status, etag: res.headers.get("etag"), body };
+  };
+
+  const store: Store = {
+    async upsertLeagues(leagues, seenAt) {
+      const { error } = await supabase.from("leagues").upsert(
+        leagues.map((l) => ({ id: l.id, name: l.name, kind: l.kind, last_seen_at: seenAt, is_active: true })),
+        { onConflict: "id" },
+      );
+      if (error) throw error;
+      const ids = leagues.map((l) => `"${l.id.replaceAll('"', '\\"')}"`).join(",");
+      const { error: e2 } = await supabase.from("leagues").update({ is_active: false }).not("id", "in", `(${ids})`);
+      if (e2) throw e2;
+    },
+    async getState(leagueId, category) {
+      const { data, error } = await supabase
+        .from("collection_state")
+        .select("etag,last_attempt_at,last_success_at,divine_chaos,divine_change7d")
+        .eq("league_id", leagueId)
+        .eq("category", category)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      return {
+        etag: data.etag,
+        lastAttemptAt: data.last_attempt_at,
+        lastSuccessAt: data.last_success_at,
+        divineChaos: data.divine_chaos,
+        divineChange7d: data.divine_change7d,
+      } satisfies CategoryState;
+    },
+    async setState(leagueId, category, s) {
+      const { error } = await supabase.from("collection_state").upsert(
+        {
+          league_id: leagueId,
+          category,
+          etag: s.etag,
+          last_attempt_at: s.lastAttemptAt,
+          last_success_at: s.lastSuccessAt,
+          divine_chaos: s.divineChaos,
+          divine_change7d: s.divineChange7d,
+        },
+        { onConflict: "league_id,category" },
+      );
+      if (error) throw error;
+    },
+    async ingest(leagueId, category, capturedAt, items) {
+      const { data, error } = await supabase.rpc("ingest_snapshot", {
+        p_league_id: leagueId,
+        p_category: category,
+        p_captured_at: capturedAt,
+        p_items: items,
+      });
+      if (error) throw error;
+      return data as number;
+    },
+    async recordRun(r) {
+      const { error } = await supabase.from("collection_runs").insert({
+        league_id: r.leagueId,
+        category: r.category,
+        started_at: r.startedAt,
+        status: r.status,
+        divine_chaos: r.divineChaos,
+        item_count: r.itemCount,
+        warnings: r.warnings.length ? r.warnings : null,
+        error: r.error,
+      });
+      if (error) throw error;
+    },
+  };
+
+  try {
+    const summary = await collect(
+      { fetchJson, store, now: () => new Date(), sleep, alerts },
+      { tier, budgetMs: 100_000 },
+    );
+    return Response.json(summary);
+  } catch (e) {
+    console.error(e);
+    return Response.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
+  }
+});
+
+async function loadConfig(supabase: ReturnType<typeof createClient>) {
+  const { data } = await supabase.from("app_config").select("key,value").in("key", ["collector_token", "ninja_contact", "discord_webhook_url"]);
+  const out: Record<string, string> = {};
+  for (const row of data ?? []) out[row.key as string] = row.value as string;
+  return out as { collector_token?: string; ninja_contact?: string; discord_webhook_url?: string };
+}
+</script>
+<script type="text/plain" id="sql-schedule-template">
+-- One-time setup after the migration and the `collect` Edge Function deploy.
+-- Replace __PROJECT_URL__ (e.g. https://abcd1234.supabase.co) and
+-- __CONTACT__ (contact shown to poe.ninja in the User-Agent) before running.
+-- Safe to run again: jobs with the same name are replaced.
+
+create extension if not exists pg_cron;
+create extension if not exists pg_net;
+
+insert into public.app_config (key, value)
+values ('collector_token', replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', ''))
+on conflict (key) do nothing;
+
+insert into public.app_config (key, value) values
+  ('project_url', '__PROJECT_URL__'),
+  ('ninja_contact', '__CONTACT__')
+on conflict (key) do update set value = excluded.value;
+
+-- Minutes are offset from :00/:15/:30/:45 so we do not pile onto the busiest moments.
+-- poe.ninja refreshes PoE 1 data about every 15 minutes; unchanged data costs a 304.
+select cron.schedule('collect-fast', '2,17,32,47 * * * *', $job$
+  select net.http_post(
+    url     := (select value from public.app_config where key = 'project_url') || '/functions/v1/collect?tier=fast',
+    headers := jsonb_build_object(
+                 'Content-Type', 'application/json',
+                 'x-collector-token', (select value from public.app_config where key = 'collector_token')),
+    body    := '{}'::jsonb,
+    timeout_milliseconds := 150000)
+$job$);
+
+select cron.schedule('collect-slow', '19 * * * *', $job$
+  select net.http_post(
+    url     := (select value from public.app_config where key = 'project_url') || '/functions/v1/collect?tier=slow',
+    headers := jsonb_build_object(
+                 'Content-Type', 'application/json',
+                 'x-collector-token', (select value from public.app_config where key = 'collector_token')),
+    body    := '{}'::jsonb,
+    timeout_milliseconds := 150000)
+$job$);
+
+select cron.schedule('compact-hourly', '52 * * * *', $job$ select public.compact_price_points(now(), false) $job$);
+select cron.schedule('compact-daily',  '41 0 * * *', $job$ select public.compact_price_points(now(), true)  $job$);
+select cron.schedule('prune-alerts',   '45 0 * * *', $job$ select public.prune_alert_events() $job$);
+</script>
+<script type="text/plain" id="sql-run">-- Toplayıcıyı şimdi bir kez çalıştırır (güncel challenge ligi).
+select net.http_post(
+  url     := (select value from public.app_config where key = 'project_url') || '/functions/v1/collect?tier=fast',
+  headers := jsonb_build_object(
+               'Content-Type', 'application/json',
+               'x-collector-token', (select value from public.app_config where key = 'collector_token')),
+  body    := '{}'::jsonb,
+  timeout_milliseconds := 150000);</script>
+<script type="text/plain" id="sql-u1">-- Güncel ligi 15 dakikada bir toplar (saat başı 2, 17, 32 ve 47 geçe, UTC).
+select cron.schedule('collect-fast', '2,17,32,47 * * * *', $job$
+  select net.http_post(
+    url     := (select value from public.app_config where key = 'project_url') || '/functions/v1/collect?tier=fast',
+    headers := jsonb_build_object(
+                 'Content-Type', 'application/json',
+                 'x-collector-token', (select value from public.app_config where key = 'collector_token')),
+    body    := '{}'::jsonb,
+    timeout_milliseconds := 150000)
+$job$);</script>
+<script type="text/plain" id="sql-u2-migration">
+-- PoE Economy Tools — intraday changes and alerts (v0.3.0)
+--
+-- price_change_window(): change of every item in a league over a window
+--   (15 min, 1 h, 6 h, 24 h, …) from our own snapshots. The "then" price is the
+--   newest point at or before now − window, and only if it is not much older
+--   than that; otherwise the change is NULL (never guessed from stale data).
+--
+-- Alerts: one row per rule. A rule targets one item, or every item of a
+-- category (item_id NULL) — "tell me about any Scarab that rises 15% in 1 h".
+-- It follows a league KIND (current challenge, Standard, …) so it keeps working
+-- when a new league starts. State is kept per (alert, item).
+--   above / below : price crosses a level (chaos or divine); fires once, re-arms
+--                   when the price goes back across.
+--   rise / drop   : % change over window_minutes reaches threshold; then waits
+--                   cooldown_minutes before firing again for that item.
+-- Thin markets are skipped below min_confidence (0 low, 1 medium, 2 high).
+
+-- ---------------------------------------------------------------- changes
+create or replace function public.price_change_window(
+  p_league_id text,
+  p_window    interval,
+  p_now       timestamptz default now()
+)
+returns table (
+  item_id      int,
+  now_chaos    real,
+  now_divine   real,
+  then_chaos   real,
+  then_ts      timestamptz,
+  change_pct   real,
+  volume_chaos real,
+  confidence   smallint,
+  updated_at   timestamptz
+)
+language sql
+stable
+set search_path = public
+as $$
+  select lp.item_id, lp.chaos_value, lp.divine_value, past.chaos_value, past.ts,
+         case when past.chaos_value > 0 and lp.chaos_value is not null
+              then ((lp.chaos_value / past.chaos_value) - 1) * 100 end::real,
+         lp.volume_chaos, lp.confidence, lp.updated_at
+  from latest_prices lp
+  left join lateral (
+    select pp.chaos_value, pp.ts
+    from price_points pp
+    where pp.league_id = lp.league_id
+      and pp.item_id = lp.item_id
+      and pp.resolution in (0, 1)
+      and pp.chaos_value is not null
+      and pp.ts <= p_now - p_window
+      -- the comparison point may be at most 25% of the window (min 20 min) older than asked
+      and pp.ts >= p_now - p_window - greatest(interval '20 minutes', p_window / 4)
+    order by pp.ts desc, pp.resolution asc
+    limit 1
+  ) past on true
+  where lp.league_id = p_league_id;
+$$;
+
+-- ---------------------------------------------------------------- alert rules
+create table if not exists public.alerts (
+  id               bigserial primary key,
+  label            text,
+  league_kind      text not null default 'challenge'
+                   check (league_kind in ('challenge', 'challenge_hc', 'standard', 'hardcore')),
+  category         text not null,                  -- poe.ninja type, e.g. 'Currency', 'Scarab'
+  item_id          int references public.items (id) on delete cascade,  -- NULL = every item in category
+  kind             text not null check (kind in ('above', 'below', 'rise', 'drop')),
+  threshold        real not null check (threshold > 0),
+  unit             text check (unit in ('chaos', 'divine')),             -- for above/below
+  window_minutes   int check (window_minutes in (15, 30, 60, 180, 360, 720, 1440)),  -- for rise/drop
+  min_confidence   smallint not null default 1 check (min_confidence in (0, 1, 2)),
+  cooldown_minutes int not null default 60 check (cooldown_minutes >= 15),
+  is_active        boolean not null default true,
+  created_at       timestamptz not null default now(),
+  check ((kind in ('above', 'below') and unit is not null and window_minutes is null)
+      or (kind in ('rise', 'drop') and window_minutes is not null and unit is null))
+);
+
+create table if not exists public.alert_item_state (
+  alert_id      bigint not null references public.alerts (id) on delete cascade,
+  item_id       int    not null references public.items (id) on delete cascade,
+  armed         boolean not null default true,
+  last_fired_at timestamptz,
+  primary key (alert_id, item_id)
+);
+
+create table if not exists public.alert_events (
+  id           bigserial primary key,
+  alert_id     bigint not null references public.alerts (id) on delete cascade,
+  item_id      int    not null references public.items (id) on delete cascade,
+  item_name    text,                          -- copied at fire time so the message is self-contained
+  alert_label  text,
+  league_id    text   not null,
+  fired_at     timestamptz not null,
+  kind         text not null,
+  threshold    real not null,
+  unit         text,
+  window_minutes int,
+  now_chaos    real,
+  now_divine   real,
+  change_pct   real,
+  volume_chaos real,
+  confidence   smallint,
+  delivered_at timestamptz,
+  error        text
+);
+create index if not exists alert_events_fired_idx on public.alert_events (fired_at desc);
+
+-- ---------------------------------------------------------------- evaluation
+-- Called by the collector right after it stored a (league, category) snapshot.
+-- Returns the events that fired now (already recorded, not yet delivered).
+create or replace function public.evaluate_alerts(
+  p_league_id text,
+  p_category  text,
+  p_now       timestamptz default now(),
+  p_max_per_alert int default 10
+)
+returns setof public.alert_events
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_kind text;
+  a      alerts%rowtype;
+  r      record;
+  v_cond boolean;
+  v_val  real;
+  v_fired int;
+  st     alert_item_state%rowtype;
+  ev     alert_events%rowtype;
+begin
+  select kind into v_kind from leagues where id = p_league_id;
+  if v_kind is null then return; end if;
+
+  for a in
+    select * from alerts
+    where is_active and league_kind = v_kind and category = p_category
+    order by id
+  loop
+    v_fired := 0;
+    for r in
+      select c.*, i.id as iid, i.name as iname
+      from price_change_window(
+             p_league_id,
+             make_interval(mins => coalesce(a.window_minutes, 15)),
+             p_now) c                                    -- computed once per rule
+      join items i on i.id = c.item_id
+      where i.category = p_category
+        and (a.item_id is null or i.id = a.item_id)
+        and c.updated_at = p_now                        -- only items refreshed in this run
+        and coalesce(c.confidence, 0) >= a.min_confidence
+      order by c.volume_chaos desc nulls last
+    loop
+      insert into alert_item_state (alert_id, item_id) values (a.id, r.iid)
+      on conflict do nothing;
+      select * into st from alert_item_state where alert_id = a.id and item_id = r.iid for update;
+
+      if a.kind in ('above', 'below') then
+        v_val := case a.unit when 'chaos' then r.now_chaos else r.now_divine end;
+        continue when v_val is null;
+        v_cond := (a.kind = 'above' and v_val >= a.threshold)
+               or (a.kind = 'below' and v_val <= a.threshold);
+        if not v_cond then
+          if not st.armed then
+            update alert_item_state set armed = true where alert_id = a.id and item_id = r.iid;
+          end if;
+          continue;
+        end if;
+        continue when not st.armed;
+        update alert_item_state set armed = false, last_fired_at = p_now
+          where alert_id = a.id and item_id = r.iid;
+      else
+        continue when r.change_pct is null;
+        v_cond := (a.kind = 'rise' and r.change_pct >= a.threshold)
+               or (a.kind = 'drop' and r.change_pct <= -a.threshold);
+        continue when not v_cond;
+        continue when st.last_fired_at is not null
+                  and p_now - st.last_fired_at < make_interval(mins => a.cooldown_minutes);
+        update alert_item_state set last_fired_at = p_now
+          where alert_id = a.id and item_id = r.iid;
+      end if;
+
+      insert into alert_events (alert_id, item_id, item_name, alert_label, league_id, fired_at, kind, threshold, unit,
+                                window_minutes, now_chaos, now_divine, change_pct, volume_chaos, confidence)
+      values (a.id, r.iid, r.iname, a.label, p_league_id, p_now, a.kind, a.threshold, a.unit,
+              a.window_minutes, r.now_chaos, r.now_divine, r.change_pct, r.volume_chaos, r.confidence)
+      returning * into ev;
+      return next ev;
+
+      v_fired := v_fired + 1;
+      exit when v_fired >= p_max_per_alert;
+    end loop;
+  end loop;
+end;
+$$;
+
+create or replace function public.mark_alert_delivery(p_ids bigint[], p_error text default null)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update alert_events
+     set delivered_at = case when p_error is null then now() end,
+         error = p_error
+   where id = any(p_ids);
+$$;
+
+-- Keep two weeks of alert history.
+create or replace function public.prune_alert_events(p_now timestamptz default now())
+returns int
+language sql
+security definer
+set search_path = public
+as $$
+  with d as (delete from alert_events where fired_at < p_now - interval '14 days' returning 1)
+  select count(*)::int from d;
+$$;
+
+-- ---------------------------------------------------------------- security
+-- Alert rules and events are private for now (single owner, no accounts yet).
+alter table public.alerts           enable row level security;
+alter table public.alert_item_state enable row level security;
+alter table public.alert_events     enable row level security;
+
+revoke all on function public.evaluate_alerts(text, text, timestamptz, int) from public, anon, authenticated;
+revoke all on function public.mark_alert_delivery(bigint[], text) from public, anon, authenticated;
+revoke all on function public.prune_alert_events(timestamptz) from public, anon, authenticated;
+grant execute on function public.evaluate_alerts(text, text, timestamptz, int) to service_role;
+grant execute on function public.mark_alert_delivery(bigint[], text) to service_role;
+grant execute on function public.prune_alert_events(timestamptz) to service_role;
+-- price_change_window is read-only over public data: anyone may call it.
+grant execute on function public.price_change_window(text, interval, timestamptz) to anon, authenticated, service_role;
+
+
+-- Eski alarm kayıtlarını her gece temizler.
+select cron.schedule('prune-alerts',   '45 0 * * *', $job$ select public.prune_alert_events() $job$);</script>
+<script type="text/plain" id="sql-u3-migration">
+-- PoE Economy Tools — read functions for the Market page (v0.4.0)
+-- Both are read-only over public market data and callable with the publishable key.
+
+-- One row per item of a league: current price + intraday changes from our own
+-- snapshots (NULL until enough history exists — never guessed) + the source's
+-- 7-day trend.
+create or replace function public.market_overview(p_league_id text, p_now timestamptz default now())
+returns table (
+  item_id         int,
+  ninja_id        text,
+  name            text,
+  category        text,
+  icon_url        text,
+  chaos_value     real,
+  divine_value    real,
+  volume_chaos    real,
+  confidence      smallint,
+  updated_at      timestamptz,
+  change_1h       real,
+  change_6h       real,
+  change_24h      real,
+  change7d_chaos  real,
+  change7d_divine real
+)
+language sql
+stable
+set search_path = public
+as $$
+  select i.id, i.ninja_id, i.name, i.category, i.icon_url,
+         lp.chaos_value, lp.divine_value, lp.volume_chaos, lp.confidence, lp.updated_at,
+         h1.change_pct, h6.change_pct, h24.change_pct,
+         lp.change7d_chaos, lp.change7d_divine
+  from latest_prices lp
+  join items i on i.id = lp.item_id
+  left join price_change_window(p_league_id, interval '1 hour', p_now)   h1  on h1.item_id  = lp.item_id
+  left join price_change_window(p_league_id, interval '6 hours', p_now)  h6  on h6.item_id  = lp.item_id
+  left join price_change_window(p_league_id, interval '24 hours', p_now) h24 on h24.item_id = lp.item_id
+  where lp.league_id = p_league_id;
+$$;
+
+-- Price line for one item over the last p_hours, at the finest resolution we
+-- still keep for each stretch of time: daily for old data, hourly for the last
+-- week, raw (15-min) points for the most recent hours.
+create or replace function public.price_history(
+  p_league_id text,
+  p_item_id   int,
+  p_hours     int,
+  p_now       timestamptz default now()
+)
+returns table (ts timestamptz, chaos_value real, divine_value real, volume_chaos real)
+language sql
+stable
+set search_path = public
+as $$
+  with pts as (
+    select resolution, pp.ts, pp.chaos_value, pp.divine_value, pp.volume_chaos
+    from price_points pp
+    where pp.league_id = p_league_id and pp.item_id = p_item_id
+      and pp.ts >= p_now - make_interval(hours => p_hours)
+      and pp.chaos_value is not null
+  ),
+  edge as (
+    select
+      (select min(ts) from pts where resolution = 1) as hourly_start,
+      (select max(ts) + interval '1 hour' from pts where resolution = 1) as hourly_end,
+      (select max(ts) + interval '1 day' from pts where resolution = 2) as daily_end
+  )
+  select p.ts, p.chaos_value, p.divine_value, p.volume_chaos
+  from pts p, edge e
+  where case
+          -- short ranges: raw points only
+          when p_hours <= 48 then p.resolution = 0
+          -- hourly rows wherever we still have them (last ~7 days)
+          when p.resolution = 1 then true
+          -- daily rows only for the time before hourly coverage begins
+          when p.resolution = 2 then p.ts < coalesce(e.hourly_start, 'infinity')
+          -- raw rows only for what no rollup covers yet
+          else p.ts >= coalesce(e.hourly_end, e.daily_end, '-infinity')
+        end
+  order by p.ts;
+$$;
+
+grant execute on function public.market_overview(text, timestamptz) to anon, authenticated, service_role;
+grant execute on function public.price_history(text, int, int, timestamptz) to anon, authenticated, service_role;
+
+
+-- PoE Economy Tools — v0.5.0: fit the intraday maths to poe.ninja's real cadence
+--
+-- Measured on 2026-11-04: poe.ninja publishes new exchange prices about once an
+-- hour (not every 15 min), at varying minutes. Two consequences:
+--
+-- 1. price_change_window() used "the newest point at or before now − window, at
+--    most 20 min older". With ~45–75 min gaps between real updates the 1 h
+--    change was often NULL. It now picks the point CLOSEST to now − window
+--    within a tolerance band on both sides:
+--        tolerance = greatest(25 min, window / 4)
+--        accepted age = [greatest(window − tolerance, window / 2), window + tolerance]
+--    1 h → 35–85 min, 6 h → 4.5–7.5 h, 24 h → 18–30 h. Outside the band the
+--    change stays NULL (never guessed). 15/30 min windows will mostly be NULL
+--    until poe.ninja publishes more often; that is honest, not a bug.
+--
+-- 2. False spikes: thin items sometimes jump for one update and fall back
+--    (Ancient Orb 15.85c → 6.01c in one update). New per-rule option
+--    alerts.confirm_next: the rule fires only if its condition still holds on the
+--    item's NEXT refreshed update (≈ 1 h later). Off by default.
+--
+-- Safe to run more than once.
+
+-- ---------------------------------------------------------------- changes
+create or replace function public.price_change_window(
+  p_league_id text,
+  p_window    interval,
+  p_now       timestamptz default now()
+)
+returns table (
+  item_id      int,
+  now_chaos    real,
+  now_divine   real,
+  then_chaos   real,
+  then_ts      timestamptz,
+  change_pct   real,
+  volume_chaos real,
+  confidence   smallint,
+  updated_at   timestamptz
+)
+language sql
+stable
+set search_path = public
+as $$
+  with band as (
+    select p_now - p_window as target,
+           greatest(interval '25 minutes', p_window / 4) as tol
+  )
+  select lp.item_id, lp.chaos_value, lp.divine_value, past.chaos_value, past.ts,
+         case when past.chaos_value > 0 and lp.chaos_value is not null
+              then ((lp.chaos_value / past.chaos_value) - 1) * 100 end::real,
+         lp.volume_chaos, lp.confidence, lp.updated_at
+  from latest_prices lp
+  cross join band
+  left join lateral (
+    select pp.chaos_value, pp.ts
+    from price_points pp
+    where pp.league_id = lp.league_id
+      and pp.item_id = lp.item_id
+      and pp.resolution in (0, 1)
+      and pp.chaos_value is not null
+      and pp.ts >= band.target - band.tol
+      and pp.ts <= least(band.target + band.tol, p_now - p_window / 2)
+    order by abs(extract(epoch from (pp.ts - band.target))), pp.resolution asc, pp.ts desc
+    limit 1
+  ) past on true
+  where lp.league_id = p_league_id;
+$$;
+
+-- ---------------------------------------------------------------- confirm option
+alter table public.alerts           add column if not exists confirm_next boolean not null default false;
+alter table public.alert_item_state add column if not exists pending_since timestamptz;
+
+-- ---------------------------------------------------------------- evaluation
+create or replace function public.evaluate_alerts(
+  p_league_id text,
+  p_category  text,
+  p_now       timestamptz default now(),
+  p_max_per_alert int default 10
+)
+returns setof public.alert_events
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_kind text;
+  a      alerts%rowtype;
+  r      record;
+  v_cond boolean;
+  v_val  real;
+  v_fired int;
+  st     alert_item_state%rowtype;
+  ev     alert_events%rowtype;
+begin
+  select kind into v_kind from leagues where id = p_league_id;
+  if v_kind is null then return; end if;
+
+  for a in
+    select * from alerts
+    where is_active and league_kind = v_kind and category = p_category
+    order by id
+  loop
+    v_fired := 0;
+    for r in
+      select c.*, i.id as iid, i.name as iname
+      from price_change_window(
+             p_league_id,
+             make_interval(mins => coalesce(a.window_minutes, 15)),
+             p_now) c                                    -- computed once per rule
+      join items i on i.id = c.item_id
+      where i.category = p_category
+        and (a.item_id is null or i.id = a.item_id)
+        and c.updated_at = p_now                        -- only items refreshed in this run
+        and coalesce(c.confidence, 0) >= a.min_confidence
+      order by c.volume_chaos desc nulls last
+    loop
+      insert into alert_item_state (alert_id, item_id) values (a.id, r.iid)
+      on conflict do nothing;
+      select * into st from alert_item_state where alert_id = a.id and item_id = r.iid for update;
+
+      if a.kind in ('above', 'below') then
+        v_val := case a.unit when 'chaos' then r.now_chaos else r.now_divine end;
+        continue when v_val is null;
+        v_cond := (a.kind = 'above' and v_val >= a.threshold)
+               or (a.kind = 'below' and v_val <= a.threshold);
+        if not v_cond then
+          if not st.armed or st.pending_since is not null then
+            update alert_item_state set armed = true, pending_since = null
+             where alert_id = a.id and item_id = r.iid;
+          end if;
+          continue;
+        end if;
+        continue when not st.armed;
+      else
+        if r.change_pct is null then
+          continue;                                     -- no comparison point: keep any pending state
+        end if;
+        v_cond := (a.kind = 'rise' and r.change_pct >= a.threshold)
+               or (a.kind = 'drop' and r.change_pct <= -a.threshold);
+        if not v_cond then
+          if st.pending_since is not null then
+            update alert_item_state set pending_since = null where alert_id = a.id and item_id = r.iid;
+          end if;
+          continue;
+        end if;
+        continue when st.last_fired_at is not null
+                  and p_now - st.last_fired_at < make_interval(mins => a.cooldown_minutes);
+      end if;
+
+      -- Condition holds. With confirm_next the first sighting only arms a pending
+      -- state; the next refreshed update (within 3 h) that still meets it fires.
+      if a.confirm_next and (st.pending_since is null or p_now - st.pending_since > interval '3 hours') then
+        update alert_item_state set pending_since = p_now where alert_id = a.id and item_id = r.iid;
+        continue;
+      end if;
+      continue when a.confirm_next and st.pending_since >= p_now;  -- same run evaluated twice
+
+      update alert_item_state
+         set last_fired_at = p_now,
+             pending_since = null,
+             armed = case when a.kind in ('above', 'below') then false else armed end
+       where alert_id = a.id and item_id = r.iid;
+
+      insert into alert_events (alert_id, item_id, item_name, alert_label, league_id, fired_at, kind, threshold, unit,
+                                window_minutes, now_chaos, now_divine, change_pct, volume_chaos, confidence)
+      values (a.id, r.iid, r.iname, a.label, p_league_id, p_now, a.kind, a.threshold, a.unit,
+              a.window_minutes, r.now_chaos, r.now_divine, r.change_pct, r.volume_chaos, r.confidence)
+      returning * into ev;
+      return next ev;
+
+      v_fired := v_fired + 1;
+      exit when v_fired >= p_max_per_alert;
+    end loop;
+  end loop;
+end;
+$$;
+
+revoke all on function public.evaluate_alerts(text, text, timestamptz, int) from public, anon, authenticated;
+grant execute on function public.evaluate_alerts(text, text, timestamptz, int) to service_role;
+grant execute on function public.price_change_window(text, interval, timestamptz) to anon, authenticated, service_role;
+</script>
+<script type="text/plain" id="sql-u4-migration">
+-- PoE Economy Tools — v0.6.0: compare an item's price on the same league day
+-- across leagues ("Divine Orb on day 3: Mirage 97.9 c, Keepers …, this league …").
+--
+-- Past leagues come from poe.ninja's public data dumps (https://poe.ninja/poe1/data,
+-- licensed CC BY-SA): one price per item per day. We keep only Currency Exchange
+-- style items (currency, fragments, scarabs, essences, …) of the challenge
+-- leagues (softcore and hardcore), one row per (league, item) with a daily array:
+--   prices[1] = league day 1 (launch day, UTC date), prices[2] = day 2, …
+--   NULL = no reliable price that day (poe.ninja marked it Low confidence).
+-- The current league is compared with our own snapshots.
+--
+-- Safe to run more than once.
+
+-- ---------------------------------------------------------------- league start
+alter table public.leagues add column if not exists started_on date;
+-- Curse of the Allflame (3.29) launched on 2026-07-24. Later leagues default to
+-- the day our collector first saw them (it sees a new league on launch day).
+update public.leagues set started_on = date '2026-07-24'
+ where id in ('Allflame', 'Hardcore Allflame') and started_on is null;
+
+create or replace function public.league_start(p_league_id text)
+returns date
+language sql
+stable
+set search_path = public
+as $$
+  select coalesce(started_on, (first_seen_at at time zone 'UTC')::date) from leagues where id = p_league_id;
+$$;
+
+-- ---------------------------------------------------------------- history
+create table if not exists public.league_history (
+  league      text not null,                 -- 'Mirage', 'Hardcore Mirage'
+  kind        text not null check (kind in ('challenge', 'challenge_hc')),
+  version     text,                          -- '3.28' when known
+  started_on  date not null,
+  item_name   text not null,
+  category    text not null,
+  prices      real[] not null,               -- chaos per unit by league day (1-based)
+  imported_at timestamptz not null default now(),
+  primary key (league, item_name)
+);
+create index if not exists league_history_item_idx on public.league_history (lower(item_name), kind);
+
+alter table public.league_history enable row level security;
+drop policy if exists "public read" on public.league_history;
+create policy "public read" on public.league_history for select to anon, authenticated using (true);
+
+-- Imports are written by a one-off, time-limited token (app_config keys
+-- history_import_token / history_import_expires). Nothing else may write.
+create or replace function public.import_league_history(p_token text, p_rows jsonb)
+returns int
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare n int;
+begin
+  if p_token is null or length(p_token) < 32
+     or p_token is distinct from (select value from app_config where key = 'history_import_token')
+     or coalesce((select value from app_config where key = 'history_import_expires')::timestamptz, '-infinity') < now() then
+    raise exception 'history import not allowed' using errcode = '42501';
+  end if;
+  insert into league_history (league, kind, version, started_on, item_name, category, prices, imported_at)
+  select x.league, x.kind, x.version, x.started_on, x.item_name, x.category, x.prices, now()
+  from jsonb_to_recordset(p_rows) as x(league text, kind text, version text, started_on date,
+                                       item_name text, category text, prices real[])
+  where x.league is not null and x.item_name is not null and x.prices is not null
+  on conflict (league, item_name) do update
+    set kind = excluded.kind, version = excluded.version, started_on = excluded.started_on,
+        category = excluded.category, prices = excluded.prices, imported_at = excluded.imported_at;
+  get diagnostics n = row_count;
+  return n;
+end;
+$$;
+revoke all on function public.import_league_history(text, jsonb) from public;
+grant execute on function public.import_league_history(text, jsonb) to anon, authenticated, service_role;
+
+-- ---------------------------------------------------------------- comparison
+-- Price of one item on league day p_day (default: today's day of the current
+-- league) in every past league of the same kind, plus the current league.
+-- divine = chaos / that league's Divine Orb chaos price on the same day.
+create or replace function public.league_day_compare(
+  p_league_id text,
+  p_item_id   int,
+  p_day       int default null,
+  p_now       timestamptz default now()
+)
+returns table (
+  league      text,
+  version     text,
+  started_on  date,
+  is_current  boolean,
+  day         int,
+  chaos_value real,
+  divine_value real,
+  league_days int
+)
+language sql
+stable
+set search_path = public
+as $$
+  with cur as (
+    select l.id, l.kind, league_start(l.id) as s from leagues l where l.id = p_league_id
+  ), d as (
+    select coalesce(p_day, ((p_now at time zone 'UTC')::date - cur.s) + 1) as n from cur
+  ), it as (
+    select name from items where id = p_item_id
+  ),
+  past as (
+    select h.league, h.version, h.started_on, false as is_current, d.n as day,
+           h.prices[d.n] as chaos_value,
+           case when lower(h.item_name) = 'divine orb' then case when h.prices[d.n] is not null then 1::real end
+                else h.prices[d.n] / nullif(dv.prices[d.n], 0) end::real as divine_value,
+           cardinality(h.prices) as league_days
+    from league_history h
+    cross join d cross join it cross join cur
+    left join league_history dv on dv.league = h.league and lower(dv.item_name) = 'divine orb'
+    where lower(h.item_name) = lower(it.name)
+      and h.kind = (case when cur.kind = 'challenge_hc' then 'challenge_hc' else 'challenge' end)
+  ),
+  now_row as (
+    -- current league: the live price when asking about today, else that day's average snapshot
+    select cur.id as league, null::text as version, cur.s as started_on, true as is_current, d.n as day,
+           case when p_day is null or d.n = ((p_now at time zone 'UTC')::date - cur.s) + 1
+                then lp.chaos_value else dayavg.c end::real as chaos_value,
+           case when p_day is null or d.n = ((p_now at time zone 'UTC')::date - cur.s) + 1
+                then lp.divine_value else dayavg.dv end::real as divine_value,
+           (((p_now at time zone 'UTC')::date - cur.s) + 1)::int as league_days
+    from cur cross join d
+    left join latest_prices lp on lp.league_id = cur.id and lp.item_id = p_item_id
+    left join lateral (
+      select avg(pp.chaos_value) as c, avg(pp.divine_value) as dv
+      from price_points pp
+      where pp.league_id = cur.id and pp.item_id = p_item_id
+        and pp.ts >= (cur.s + (d.n - 1))::timestamp at time zone 'UTC'
+        and pp.ts <  (cur.s + d.n)::timestamp at time zone 'UTC'
+    ) dayavg on true
+  )
+  select * from now_row
+  union all
+  select * from past
+  order by is_current desc, started_on desc;
+$$;
+
+-- Daily series for an overlay chart: one row per league with prices by league day.
+-- The current league's series is built from our snapshots (daily averages).
+create or replace function public.league_day_series(
+  p_league_id text,
+  p_item_id   int,
+  p_now       timestamptz default now()
+)
+returns table (
+  league     text,
+  version    text,
+  started_on date,
+  is_current boolean,
+  prices     real[]
+)
+language sql
+stable
+set search_path = public
+as $$
+  with cur as (
+    select l.id, l.kind, league_start(l.id) as s from leagues l where l.id = p_league_id
+  ), it as (
+    select name from items where id = p_item_id
+  ), days as (
+    select g as n from cur, generate_series(1, greatest(1, ((p_now at time zone 'UTC')::date - cur.s) + 1)) g
+  ), mine as (
+    select days.n, avg(pp.chaos_value)::real as c
+    from cur cross join days
+    left join price_points pp
+      on pp.league_id = cur.id and pp.item_id = p_item_id
+     and pp.ts >= (cur.s + (days.n - 1))::timestamp at time zone 'UTC'
+     and pp.ts <  (cur.s + days.n)::timestamp at time zone 'UTC'
+    group by days.n
+  )
+  select cur.id, null::text, cur.s, true, (select array_agg(c order by n) from mine)
+  from cur
+  union all
+  select h.league, h.version, h.started_on, false, h.prices
+  from league_history h cross join it cross join cur
+  where lower(h.item_name) = lower(it.name)
+    and h.kind = (case when cur.kind = 'challenge_hc' then 'challenge_hc' else 'challenge' end)
+  order by 4 desc, 3 desc;
+$$;
+
+grant execute on function public.league_start(text) to anon, authenticated, service_role;
+grant execute on function public.league_day_compare(text, int, int, timestamptz) to anon, authenticated, service_role;
+grant execute on function public.league_day_series(text, int, timestamptz) to anon, authenticated, service_role;
+</script>
+<script type="text/plain" id="sql-discord-test">-- Discord'a tek bir test mesajı gönderir.
+select net.http_post(
+  url     := (select value from public.app_config where key = 'project_url') || '/functions/v1/collect?mode=discord-test',
+  headers := jsonb_build_object(
+               'Content-Type', 'application/json',
+               'x-collector-token', (select value from public.app_config where key = 'collector_token')),
+  body    := '{}'::jsonb,
+  timeout_milliseconds := 30000);</script>
+<script type="text/plain" id="sql-alarm-list">-- Alarmların (son 7 günde kaç kez çaldıklarıyla) ve son 20 bildirim.
+select a.id, a.label, a.league_kind as lig, a.category as kategori, a.is_active as aktif, a.confirm_next as onayli,
+       (select count(*) from public.alert_events e where e.alert_id = a.id and e.fired_at > now() - interval '7 days') as son_7_gun
+from public.alerts a order by a.id;
+
+-- Bir alarmı kapatmak için: update public.alerts set is_active = false where id = 1;
+-- Son bildirimleri görmek için bu satırı çalıştır:
+-- select fired_at, item_name, kind, change_pct, now_chaos, delivered_at, error from public.alert_events order by fired_at desc limit 20;</script>
+<script type="text/plain" id="sql-check">-- Toplayıcının son çalışmaları ve poe.ninja yanıtları.
+select r.started_at, r.league_id, r.category, r.status, r.item_count, r.error,
+       (select status_code from net._http_response order by created desc limit 1) as son_http_kodu
+from public.collection_runs r
+union all
+select null, null, null, 'henüz kayıt yok', null,
+       (select left(content::text, 200) from net._http_response order by created desc limit 1),
+       (select status_code from net._http_response order by created desc limit 1)
+where not exists (select 1 from public.collection_runs)
+order by started_at desc nulls first
+limit 25;</script>
+
+<script>
+(() => {
+  const text = (id) => document.getElementById(id).textContent.replace(/^\n/, "");
+  const sources = {
+    "sql-migration": text("sql-migration"),
+    "ts-function": text("ts-function"),
+    "sql-run": text("sql-run"),
+    "sql-check": text("sql-check"),
+    "sql-u1": text("sql-u1"),
+    "sql-u2-migration": text("sql-u2-migration"),
+    "sql-u3-migration": text("sql-u3-migration"),
+    "sql-u4-migration": text("sql-u4-migration"),
+    "sql-discord-test": text("sql-discord-test"),
+    "sql-alarm-list": text("sql-alarm-list"),
+    "sql-webhook": "",
+    "sql-alarm": "",
+    "sql-schedule": "",
+  };
+  const scheduleTemplate = text("sql-schedule-template");
+  for (const id of ["sql-migration", "ts-function", "sql-run", "sql-check", "sql-u1", "sql-u2-migration", "sql-u3-migration", "sql-u4-migration", "sql-discord-test", "sql-alarm-list"]) {
+    document.getElementById(id + "-view").textContent = sources[id];
+  }
+
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  };
+
+  // ---- step 4: fill the schedule SQL from the inputs
+  const urlInput = document.getElementById("project-url");
+  const contactInput = document.getElementById("contact");
+  const urlStatus = document.getElementById("url-status");
+  const scheduleView = document.getElementById("sql-schedule-view");
+  const scheduleBtn = document.getElementById("copy-schedule");
+  const sqlString = (s) => s.replace(/'/g, "''");
+  const URL_RE = /^https:\/\/[a-z0-9]{15,30}\.supabase\.co$/;
+
+  function renderSchedule() {
+    const url = urlInput.value.trim().replace(/\/+$/, "");
+    const contact = contactInput.value.trim().replace(/[\r\n]/g, " ");
+    store.set("setup.url", urlInput.value);
+    store.set("setup.contact", contactInput.value);
+    if (!url) {
+      urlStatus.textContent = "";
+      urlStatus.className = "status";
+      scheduleView.textContent = "-- Önce yukarıya Project URL'yi yapıştır.";
+      scheduleBtn.disabled = true;
+      sources["sql-schedule"] = "";
+      return;
+    }
+    if (!URL_RE.test(url)) {
+      urlStatus.textContent = "Bu bir Supabase proje adresine benzemiyor. Biçim: https://abcdefghijklmnop.supabase.co";
+      urlStatus.className = "status bad";
+      scheduleView.textContent = "-- Geçerli bir Project URL bekleniyor.";
+      scheduleBtn.disabled = true;
+      sources["sql-schedule"] = "";
+      return;
+    }
+    urlStatus.textContent = "Adres doğru görünüyor.";
+    urlStatus.className = "status good";
+    const sql = scheduleTemplate
+      .replaceAll("__PROJECT_URL__", sqlString(url))
+      .replaceAll("__CONTACT__", sqlString(contact || "not set"));
+    if (/__[A-Z_]+__/.test(sql) || !sql.includes("'" + sqlString(url) + "'")) {
+      urlStatus.textContent = "Kod doldurulamadı. Bu sayfayı yenileyip tekrar dene.";
+      urlStatus.className = "status bad";
+      scheduleView.textContent = "-- Kod doldurulamadı.";
+      scheduleBtn.disabled = true;
+      sources["sql-schedule"] = "";
+      return;
+    }
+    sources["sql-schedule"] = sql;
+    scheduleView.textContent = sql;
+    scheduleBtn.disabled = false;
+  }
+  urlInput.value = store.get("setup.url") ?? "";
+  contactInput.value = store.get("setup.contact") ?? "";
+  urlInput.addEventListener("input", renderSchedule);
+  contactInput.addEventListener("input", renderSchedule);
+  renderSchedule();
+
+
+  // ---- U2c: Discord webhook (never stored, never sent anywhere)
+  const HOOK_RE = /^https:\/\/(?:discord|discordapp)\.com\/api\/webhooks\/\d+\/[\w-]+$/;
+  const hookInput = document.getElementById("webhook");
+  const hookStatus = document.getElementById("webhook-status");
+  const hookView = document.getElementById("sql-webhook-view");
+  const hookBtn = document.getElementById("copy-webhook");
+  function renderHook() {
+    const v = hookInput.value.trim();
+    if (!v) {
+      hookStatus.textContent = ""; hookStatus.className = "status";
+      hookView.textContent = "-- Önce yukarıya webhook adresini yapıştır.";
+      hookBtn.disabled = true; sources["sql-webhook"] = ""; return;
+    }
+    if (!HOOK_RE.test(v)) {
+      hookStatus.textContent = "Bu bir Discord webhook adresine benzemiyor. Biçim: https://discord.com/api/webhooks/123…/abc…";
+      hookStatus.className = "status bad";
+      hookView.textContent = "-- Geçerli bir webhook adresi bekleniyor.";
+      hookBtn.disabled = true; sources["sql-webhook"] = ""; return;
+    }
+    hookStatus.textContent = "Adres doğru görünüyor."; hookStatus.className = "status good";
+    const sql = "-- Discord kanalını kaydeder (gizli ayarlar tablosuna).\n" +
+      "insert into public.app_config (key, value)\nvalues ('discord_webhook_url', '" + sqlString(v) + "')\n" +
+      "on conflict (key) do update set value = excluded.value;";
+    sources["sql-webhook"] = sql;
+    hookView.textContent = sql.replace(/(webhooks\/\d+\/)[\w-]+/, "$1••••••••");  // keep the secret off the screen
+    hookBtn.disabled = false;
+  }
+  hookInput.addEventListener("input", renderHook);
+  renderHook();
+
+  // ---- U2e: alert rule builder
+  const CATEGORIES = ["Currency","Fragment","Scarab","Essence","Fossil","Resonator","Oil","DeliriumOrb","DivinationCard","Omen","Tattoo","Runegraft","Astrolabe","Artifact","EnshroudingCrystal","DjinnCoin","Ducat","AllflameEmber"];
+  const f = (id) => document.getElementById(id);
+  const catSel = f("al-category");
+  for (const c of CATEGORIES) { const o = document.createElement("option"); o.value = c; o.textContent = c; catSel.append(o); }
+  const presets = {
+    test:         { category: "Currency", item: "Divine Orb", kind: "above", threshold: 1, unit: "chaos", confidence: "0", cooldown: 60, confirm: false },
+    divine1h:     { category: "Currency", item: "Divine Orb", kind: "rise", threshold: 3, window: "60", confidence: "1", cooldown: 60, confirm: false },
+    scarab:       { category: "Scarab", item: "", kind: "rise", threshold: 15, window: "60", confidence: "1", cooldown: 120, confirm: true },
+    currencydrop: { category: "Currency", item: "", kind: "drop", threshold: 10, window: "60", confidence: "1", cooldown: 120, confirm: true },
+  };
+  f("al-preset").addEventListener("change", (e) => {
+    const p = presets[e.target.value];
+    if (!p) return;
+    f("al-category").value = p.category; f("al-item").value = p.item; f("al-kind").value = p.kind;
+    f("al-threshold").value = p.threshold; f("al-confidence").value = p.confidence; f("al-cooldown").value = p.cooldown;
+    f("al-confirm").checked = !!p.confirm;
+    if (p.window) f("al-window").value = p.window;
+    if (p.unit) f("al-unit").value = p.unit;
+    f("al-league").value = "challenge";
+    renderAlarm();
+  });
+  const WINDOW_LABEL = { 15: "15m", 30: "30m", 60: "1h", 180: "3h", 360: "6h", 720: "12h", 1440: "24h" };
+  function renderAlarm() {
+    const kind = f("al-kind").value;
+    const pct = kind === "rise" || kind === "drop";
+    f("al-window-field").hidden = !pct;
+    f("al-unit-field").hidden = pct;
+    f("al-threshold-label").textContent = pct ? "Eşik (%)" : "Seviye";
+    const category = f("al-category").value;
+    const item = f("al-item").value.trim().replace(/[\r\n]/g, " ");
+    const threshold = Number(f("al-threshold").value);
+    const cooldown = Math.round(Number(f("al-cooldown").value));
+    const win = Number(f("al-window").value);
+    const unit = f("al-unit").value;
+    const league = f("al-league").value;
+    const conf = Number(f("al-confidence").value);
+    const confirm = f("al-confirm").checked;
+    const view = f("sql-alarm-view"), btn = f("copy-alarm");
+    let problem = "";
+    if (!(threshold > 0) || !Number.isFinite(threshold)) problem = "Eşik 0'dan büyük bir sayı olmalı.";
+    else if (!(cooldown >= 15)) problem = "Tekrar bildirme süresi en az 15 dakika olmalı.";
+    if (problem) { view.textContent = "-- " + problem; btn.disabled = true; sources["sql-alarm"] = ""; return; }
+
+    const who = item || ("any " + category);
+    const what = pct ? ((kind === "rise" ? "+" : "−") + threshold + "% in " + WINDOW_LABEL[win])
+                     : ((kind === "above" ? "above " : "below ") + threshold + (unit === "chaos" ? " c" : " div"));
+    const label = who + " " + what + (confirm ? " (confirmed)" : "");
+    const cols = "label, league_kind, category, item_id, kind, threshold, unit, window_minutes, min_confidence, cooldown_minutes, confirm_next";
+    const vals = (itemExpr) => "'" + sqlString(label) + "', '" + league + "', '" + sqlString(category) + "', " + itemExpr + ", '" +
+      kind + "', " + threshold + ", " + (pct ? "null" : "'" + unit + "'") + ", " + (pct ? win : "null") + ", " + conf + ", " + cooldown + ", " + confirm;
+    let sql;
+    if (item) {
+      sql = "-- Alarm: " + label + "\n" +
+        "do $al$\ndeclare v_item int;\nbegin\n" +
+        "  select id into v_item from public.items\n   where lower(name) = lower('" + sqlString(item) + "') and category = '" + sqlString(category) + "';\n" +
+        "  if v_item is null then\n" +
+        "    raise exception 'Eşya bulunamadı: \"%\" (%). Adı poe.ninja''daki gibi yaz ve kategoriyi kontrol et.', '" + sqlString(item) + "', '" + sqlString(category) + "';\n" +
+        "  end if;\n" +
+        "  insert into public.alerts (" + cols + ")\n  values (" + vals("v_item") + ");\n" +
+        "end\n$al$;";
+    } else {
+      sql = "-- Alarm: " + label + " (kategorideki tüm eşyalar)\n" +
+        "insert into public.alerts (" + cols + ")\nvalues (" + vals("null") + ");";
+    }
+    sources["sql-alarm"] = sql; view.textContent = sql; btn.disabled = false;
+  }
+  for (const id of ["al-category", "al-item", "al-kind", "al-threshold", "al-window", "al-unit", "al-league", "al-confidence", "al-cooldown", "al-confirm"]) {
+    f(id).addEventListener("input", renderAlarm);
+    f(id).addEventListener("change", renderAlarm);
+  }
+  f("al-category").value = "Currency"; f("al-item").value = "Divine Orb";
+  renderAlarm();
+
+  // ---- copy buttons
+  function selectPre(pre) {
+    const r = document.createRange();
+    r.selectNodeContents(pre);
+    const s = window.getSelection();
+    s.removeAllRanges();
+    s.addRange(r);
+  }
+  document.querySelectorAll("button.copy").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.copy;
+      const value = sources[key];
+      if (!value) return;
+      const pre = document.getElementById(key + "-view");
+      const done = (label) => {
+        btn.textContent = label;
+        btn.classList.toggle("copied", label === "Kopyalandı");
+        setTimeout(() => { btn.textContent = "Kopyala"; btn.classList.remove("copied"); }, 2200);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(value).then(() => done("Kopyalandı"), () => { selectPre(pre); done("Seçildi: Ctrl+C"); });
+      } else {
+        selectPre(pre);
+        done("Seçildi: Ctrl+C");
+      }
+    });
+  });
+
+  // ---- step checkboxes (remembered in this browser only)
+  document.querySelectorAll(".step").forEach((step) => {
+    const n = step.dataset.step;
+    const box = document.getElementById("done-" + n);
+    box.checked = store.get("setup.done." + n) === "1";
+    step.classList.toggle("done", box.checked);
+    box.addEventListener("change", () => {
+      store.set("setup.done." + n, box.checked ? "1" : "0");
+      step.classList.toggle("done", box.checked);
+    });
+  });
+})();
+</script>

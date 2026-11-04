@@ -1,0 +1,34 @@
+{
+  "_note": "Trimmed real response from GET https://poe.ninja/poe1/api/economy/exchange/current/overview?league=Allflame&type=Currency, captured 2026-11-04. Only a subset of lines is kept; numbers are unchanged.",
+  "core": {
+    "items": [
+      { "id": "chaos", "name": "Chaos Orb", "category": "Currency", "detailsId": "chaos-orb" },
+      { "id": "divine", "name": "Divine Orb", "category": "Currency", "detailsId": "divine-orb" }
+    ],
+    "rates": { "divine": 0.002489 },
+    "primary": "chaos",
+    "secondary": "divine"
+  },
+  "lines": [
+    { "id": "chaos", "primaryValue": 1, "volumePrimaryValue": 294938, "maxVolumeCurrency": "divine", "maxVolumeRate": 401.8, "sparkline": { "totalChange": -14.71, "data": [1.54, 1.73, -2.58, -5.75, -8.79, -13.63, -14.71] } },
+    { "id": "divine", "primaryValue": 401.8, "volumePrimaryValue": 294938, "maxVolumeCurrency": "chaos", "maxVolumeRate": 0.002489, "sparkline": { "totalChange": 17.25, "data": [-1.51, -1.70, 2.71, 6.14, 9.65, 15.80, 17.25] } },
+    { "id": "annul", "primaryValue": 16.25, "volumePrimaryValue": 14533, "maxVolumeCurrency": "divine", "maxVolumeRate": 24.73, "sparkline": { "totalChange": -1.94, "data": [5.67, 5.92, 9.19, 7.39, 1.10, -0.85, -1.94] } },
+    { "id": "awakeners-orb", "primaryValue": 1138, "volumePrimaryValue": 7969, "maxVolumeCurrency": "divine", "maxVolumeRate": 0.3529, "sparkline": { "totalChange": 8.03, "data": [-1.71, 3.59, 0.00, -0.57, 0.71, -2.17, 8.03] } },
+    { "id": "alt", "primaryValue": 0.1119, "volumePrimaryValue": 1157, "maxVolumeCurrency": "chaos", "maxVolumeRate": 8.94, "sparkline": { "totalChange": 55.35, "data": [15.02, 38.95, 38.95, 54.55, 7.89, 32.05, 55.35] } },
+    { "id": "hunters-exalted-orb", "primaryValue": 803.6, "volumePrimaryValue": 803.6, "maxVolumeCurrency": "divine", "maxVolumeRate": 0.5, "sparkline": { "totalChange": 100, "data": [149.2, 93.00, 150.6, 155.6, 149.0, 163.9, 100] } },
+    { "id": "orb-of-intention", "primaryValue": 4.5, "volumePrimaryValue": 1.50, "maxVolumeCurrency": "chaos", "maxVolumeRate": 0.2222, "sparkline": { "totalChange": 50.0, "data": [-2.12, -27.78, -15.41, -2.78, 22.53, 31.82, 50.0] } },
+    { "id": "mirror", "primaryValue": 501173, "volumePrimaryValue": 1670577, "maxVolumeCurrency": "divine", "maxVolumeRate": 0.0008018, "sparkline": { "totalChange": 10.86, "data": [-0.21, 1.03, 0.18, -0.92, 0.55, 4.97, 10.86] } },
+    { "id": "redeemers-exalted-orb", "primaryValue": 803.6, "volumePrimaryValue": 669.7, "maxVolumeCurrency": "divine", "maxVolumeRate": 0.5, "sparkline": { "totalChange": 100, "data": [null, 0, 6.06, 65.00, 50.0, 25.00, 100] } }
+  ],
+  "items": [
+    { "id": "chaos", "name": "Chaos Orb", "category": "Currency", "detailsId": "chaos-orb" },
+    { "id": "divine", "name": "Divine Orb", "category": "Currency", "detailsId": "divine-orb" },
+    { "id": "annul", "name": "Orb of Annulment", "category": "Currency", "detailsId": "orb-of-annulment" },
+    { "id": "awakeners-orb", "name": "Awakener's Orb", "category": "Currency", "detailsId": "awakeners-orb" },
+    { "id": "alt", "name": "Orb of Alteration", "category": "Currency", "detailsId": "orb-of-alteration" },
+    { "id": "hunters-exalted-orb", "name": "Hunter's Exalted Orb", "category": "Currency", "detailsId": "hunters-exalted-orb" },
+    { "id": "orb-of-intention", "name": "Orb of Intention", "category": "Currency", "detailsId": "orb-of-intention" },
+    { "id": "mirror", "name": "Mirror of Kalandra", "category": "Currency", "detailsId": "mirror-of-kalandra" },
+    { "id": "redeemers-exalted-orb", "name": "Redeemer's Exalted Orb", "category": "Currency", "detailsId": "redeemers-exalted-orb" }
+  ]
+}

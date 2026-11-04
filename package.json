@@ -1,0 +1,13 @@
+{
+  "name": "poe-economy-tools",
+  "version": "0.6.1",
+  "private": true,
+  "description": "Path of Exile 1 economy analysis and portfolio tool (data layer + market page).",
+  "type": "module",
+  "engines": {
+    "node": ">=22.6"
+  },
+  "scripts": {
+    "test": "node --experimental-strip-types --test test/*.test.ts"
+  }
+}
