@@ -215,3 +215,7 @@ footer p { margin: 0; max-width: 90ch; }
 .cmp[data-divine="true"] .seg { display: none; }
 .lg-dot { fill: var(--lg-cur); stroke: var(--panel); stroke-width: 2; }
 .near { font-size: 12px; }
+.more-row td { text-align: center; padding: 14px 12px; white-space: normal; }
+.more-row td .muted { display: block; margin-top: 6px; font-size: 13px; }
+.more-row { cursor: default; }
+.more-row:hover { background: none; }

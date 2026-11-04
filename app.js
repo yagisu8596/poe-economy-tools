@@ -189,9 +189,18 @@ export function startApp(source) {
       query: state.query, category: v.category, minConfidence: state.hideThin ? 1 : 0,
       sort: state.sort, windowField: w.field,
     });
+    // How many items the thin-market filter is hiding right now (same search and category).
+    const hidden = state.hideThin
+      ? selectRows(v.rows, { query: state.query, category: v.category, minConfidence: 0, sort: state.sort, windowField: w.field }).length - rows.length
+      : 0;
+    const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
     $("#count").textContent = state.loading && !state.rows.length ? "" :
-      `${rows.length} item${rows.length === 1 ? "" : "s"}${state.hideThin ? " · thin markets hidden" : ""}`;
-    $("#tbody").innerHTML = rows.map((r) => {
+      `${plural(rows.length, "item")}${hidden ? ` · ${plural(hidden, "thin market")} hidden` : ""}`;
+    const moreRow = hidden
+      ? `<tr class="more-row"><td colspan="5"><button type="button" class="btn more-btn" data-show-thin>${rows.length ? "" : "All items here trade rarely. "}Show ${hidden} hidden thin market${hidden === 1 ? "" : "s"}</button>
+         <span class="muted">Few trades, so prices can jump.</span></td></tr>`
+      : "";
+    $("#tbody").innerHTML = (rows.map((r) => {
       const p = displayPrice(r), c = formatChange(r[w.field]);
       const conf = CONFIDENCE[r.confidence ?? 0];
       return `<tr data-item="${r.item_id}" tabindex="0" ${state.selected?.item_id === r.item_id ? 'aria-selected="true"' : ""}>
@@ -203,7 +212,7 @@ export function startApp(source) {
       </tr>`;
     }).join("") || `<tr><td colspan="5" class="empty">${state.loading ? "Loading prices…"
       : state.category === "watch" && !v.rows.length ? "Your watchlist is empty. Tap ☆ next to an item to add it."
-      : "No items match."}</td></tr>`;
+      : hidden ? "" : "No items match."}</td></tr>`).replace(/^<tr><td colspan="5" class="empty"><\/td><\/tr>$/, "") + moreRow;
   }
 
   function renderDetail() {
@@ -388,6 +397,11 @@ export function startApp(source) {
     toast(ok ? done : `Copy blocked here. Text: ${text}`);
   }
   document.addEventListener("click", (e) => {
+    if (e.target.closest("[data-show-thin]")) {
+      state.hideThin = false; store.set("hideThin", false); render();
+      toast("Showing thin markets. Tick “Hide thin markets” to hide them again.");
+      return;
+    }
     const s = e.target.closest("[data-star]");
     if (s) { e.stopPropagation(); toggleStar(s.dataset.star); return; }
     const t = e.target.closest("[data-item]");
